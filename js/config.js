@@ -22,11 +22,11 @@
    ============================================================ */
 
 window.FIREBASE_CONFIG = {
-  // apiKey: "...",
-  // authDomain: "...",
-  // databaseURL: "...",
-  // projectId: "...",
-  // storageBucket: "...",
-  // messagingSenderId: "...",
-  // appId: "...",
+  apiKey: "AIzaSyBFayIhEzjeNqusup3KA1sPIGc_9RRKeaw",
+  authDomain: "evolute-79220.firebaseapp.com",
+  databaseURL: "https://evolute-79220-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "evolute-79220",
+  storageBucket: "evolute-79220.firebasestorage.app",
+  messagingSenderId: "651890149404",
+  appId: "1:651890149404:web:3cd179e75028aa309f37d9",
 };
