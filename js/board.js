@@ -152,6 +152,11 @@ Evo.Board = (function(){
     const me = myPlayer();
     if (!me) return;
 
+    // ИСПРАВЛЕНИЕ: защита от undefined-массивов (Firebase стирает пустые []).
+    // Если массив не определён — считаем его пустым.
+    const myHand    = me.hand    || [];
+    const myDiscard = me.discard || [];
+
     document.getElementById('myNameLabel').textContent = me.name;
     document.getElementById('foodCount').textContent = room.foodCount || 0;
 
@@ -162,52 +167,58 @@ Evo.Board = (function(){
     pileCard.className = 'minicard facedown';
     pileCard.innerHTML = `<div class="mi-icon">🂠</div><div class="mi-name">колода</div>`;
     drawPile.appendChild(pileCard);
-    document.getElementById('drawMeta').textContent = room.deck.length + ' карт в колоде';
+    document.getElementById('drawMeta').textContent = (room.deck ? room.deck.length : 0) + ' карт в колоде';
     pileCard.addEventListener('click', drawCard);
     Evo.Drag.makeDraggable(pileCard, { kind:'deck' }, handleDrop);
 
     // --- hand ---
     const handRow = document.getElementById('handRow');
     handRow.innerHTML = '';
-    handRow.classList.toggle('empty', me.hand.length === 0);
-    me.hand.forEach(card=>{
+    handRow.classList.toggle('empty', myHand.length === 0);
+    myHand.forEach(card=>{
       const el = cardEl(card);
       Evo.Drag.makeDraggable(el, { kind:'hand', uid: card.uid }, handleDrop);
       handRow.appendChild(el);
     });
     markDropzone(handRow, { zoneType: 'hand' });
-    document.getElementById('handCount').textContent = me.hand.length + ' карт';
+    document.getElementById('handCount').textContent = myHand.length + ' карт';
 
     // --- discard (own) ---
     const discardRow = document.getElementById('discardRow');
     discardRow.innerHTML = '';
-    discardRow.classList.toggle('empty', me.discard.length === 0);
-    me.discard.slice(-8).forEach(card => discardRow.appendChild(cardEl(card, { locked:true })));
+    discardRow.classList.toggle('empty', myDiscard.length === 0);
+    myDiscard.slice(-8).forEach(card => discardRow.appendChild(cardEl(card, { locked:true })));
     markDropzone(discardRow, { zoneType: 'discard' });
-    document.getElementById('discardCount').textContent = me.discard.length + ' карт';
+    document.getElementById('discardCount').textContent = myDiscard.length + ' карт';
 
     // --- all players' tables ---
     const allTables = document.getElementById('allTables');
     allTables.innerHTML = '';
     room.players.forEach(p=>{
+      // ИСПРАВЛЕНИЕ: защита от undefined-массивов для каждого игрока
+      const table = p.table || [];
+
       const zone = document.createElement('div');
       zone.className = 'zone' + (p.id === Evo.Session.playerId ? ' mine' : '');
       const h3 = document.createElement('h3');
-      h3.innerHTML = `<span>Стол — <span class="pname">${p.name}${p.id===Evo.Session.playerId?' (вы)':''}</span></span><span class="mono">${p.table.length} видов</span>`;
+      h3.innerHTML = `<span>Стол — <span class="pname">${p.name}${p.id===Evo.Session.playerId?' (вы)':''}</span></span><span class="mono">${table.length} видов</span>`;
       zone.appendChild(h3);
 
       const row = document.createElement('div');
-      row.className = 'cardrow' + (p.table.length === 0 ? ' empty' : '');
+      row.className = 'cardrow' + (table.length === 0 ? ' empty' : '');
       markDropzone(row, { zoneType: 'newspecies', zonePlayer: p.id });
 
-      p.table.forEach((sp, idx)=>{
+      table.forEach((sp, idx)=>{
+        // ИСПРАВЛЕНИЕ: защита от undefined-массива свойств вида
+        const props = sp.props || [];
+
         const wrap = document.createElement('div');
         wrap.className = 'species';
         markDropzone(wrap, { zoneType: 'attach', zonePlayer: p.id, zoneSpecies: idx });
         wrap.appendChild(cardEl(sp.card, { facedown:true, locked:true }));
         const tags = document.createElement('div');
         tags.className = 'taglist';
-        sp.props.forEach(pc=>{
+        props.forEach(pc=>{
           const face = Evo.getFace(pc);
           const t = document.createElement('span');
           t.className = 'tag';
@@ -227,8 +238,10 @@ Evo.Board = (function(){
 
   function drawCard(){
     mutate(r=>{
-      if (r.deck.length === 0) return;
+      if (!r.deck || r.deck.length === 0) return;
       const me = r.players.find(p=>p.id===Evo.Session.playerId);
+      if (!me) return;
+      if (!me.hand) me.hand = [];
       me.hand.push(r.deck.pop());
     });
   }
@@ -246,8 +259,11 @@ Evo.Board = (function(){
         mutate(r=>{
           const me = r.players.find(p=>p.id===Evo.Session.playerId);
           const target = r.players.find(p=>p.id===zone.playerId);
+          if (!me || !target) return;
+          if (!me.hand) me.hand = [];
+          if (!target.table) target.table = [];
           const idx = me.hand.findIndex(c=>c.uid===payload.uid);
-          if (idx<0 || !target) return;
+          if (idx<0) return;
           const [card] = me.hand.splice(idx,1);
           target.table.push({ card, props: [] });
         });
@@ -255,16 +271,23 @@ Evo.Board = (function(){
         mutate(r=>{
           const me = r.players.find(p=>p.id===Evo.Session.playerId);
           const target = r.players.find(p=>p.id===zone.playerId);
+          if (!me || !target) return;
+          if (!me.hand) me.hand = [];
+          if (!target.table) target.table = [];
           const idx = me.hand.findIndex(c=>c.uid===payload.uid);
-          if (idx<0 || !target) return;
+          if (idx<0) return;
           const sp = target.table[Number(zone.speciesIdx)];
           if (!sp) return;
+          if (!sp.props) sp.props = [];
           const [card] = me.hand.splice(idx,1);
           sp.props.push(card);
         });
       } else if (zone.type === 'discard'){
         mutate(r=>{
           const me = r.players.find(p=>p.id===Evo.Session.playerId);
+          if (!me) return;
+          if (!me.hand) me.hand = [];
+          if (!me.discard) me.discard = [];
           const idx = me.hand.findIndex(c=>c.uid===payload.uid);
           if (idx<0) return;
           const [card] = me.hand.splice(idx,1);
