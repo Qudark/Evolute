@@ -9,6 +9,8 @@ window.Evo = window.Evo || {};
 Evo.Board = (function(){
   let room = null;
   let unsubscribe = null;
+  let currentOppIdx = 0;
+  let controlsReady = false;
 
   function enter(initialRoom){
     room = initialRoom;
@@ -24,6 +26,61 @@ Evo.Board = (function(){
       render();
     });
     render();
+    if (!controlsReady) setupControls();
+  }
+
+  function setupControls(){
+    controlsReady = true;
+
+    // Стрелки соперников
+    document.getElementById('oppArrowLeft').addEventListener('click', () => {
+      if (currentOppIdx > 0) { currentOppIdx--; renderGame(); }
+    });
+    document.getElementById('oppArrowRight').addEventListener('click', () => {
+      const opponents = room ? room.players.filter(p => p.id !== Evo.Session.playerId) : [];
+      if (currentOppIdx < opponents.length - 1) { currentOppIdx++; renderGame(); }
+    });
+
+    // Свайп по зоне соперников
+    const strip = document.getElementById('opponentStrip');
+    let touchStartX = 0;
+    strip.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    strip.addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      const opponents = room ? room.players.filter(p => p.id !== Evo.Session.playerId) : [];
+      if (Math.abs(diff) > 40) {
+        if (diff > 0 && currentOppIdx < opponents.length - 1) currentOppIdx++;
+        else if (diff < 0 && currentOppIdx > 0) currentOppIdx--;
+        renderGame();
+      }
+    }, { passive: true });
+
+    // Меню (три точки)
+    document.getElementById('menuDots').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('controlsPopup').classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+      document.getElementById('controlsPopup').classList.remove('open');
+    });
+
+    // Переключение вида через меню
+    document.querySelectorAll('.ctrl-btn[data-view]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-' + view).classList.add('active');
+        document.querySelectorAll('nav.tabs button').forEach(b => {
+          b.classList.toggle('active', b.dataset.view === view);
+        });
+      });
+    });
+
+    // Кормовая база
+    document.getElementById('foodMinus').addEventListener('click', () => foodAdjust(-1));
+    document.getElementById('foodPlus').addEventListener('click', () => foodAdjust(1));
   }
 
   async function mutate(fn){
@@ -45,7 +102,6 @@ Evo.Board = (function(){
     } else {
       document.getElementById('lobbyBlock').style.display = 'none';
       document.getElementById('boardBlock').style.display = 'block';
-      renderPhaseTrack();
       renderGame();
     }
   }
@@ -152,88 +208,202 @@ Evo.Board = (function(){
     const me = myPlayer();
     if (!me) return;
 
-    // ИСПРАВЛЕНИЕ: защита от undefined-массивов (Firebase стирает пустые []).
-    // Если массив не определён — считаем его пустым.
+    // Защита от undefined-массивов (Firebase стирает пустые [])
     const myHand    = me.hand    || [];
     const myDiscard = me.discard || [];
 
-    document.getElementById('myNameLabel').textContent = me.name;
+    renderPhaseTrack();
+    renderSyncTag();
+
+    // --- Соперники ---
+    const opponents = room.players.filter(p => p.id !== Evo.Session.playerId);
+    renderOpponents(opponents);
+
+    // --- Стол игрока ---
+    renderPlayerTable(me);
+
+    // --- Колода ---
+    renderDeck();
+
+    // --- Рука ---
+    renderHand(myHand);
+
+    // --- Счётчики ---
     document.getElementById('foodCount').textContent = room.foodCount || 0;
+    document.getElementById('discardCount').textContent = myDiscard.length;
+    document.getElementById('handCount').textContent = myHand.length;
+    document.getElementById('drawMeta').textContent = (room.deck ? room.deck.length : 0) + ' карт';
+  }
 
-    // --- draw pile ---
-    const drawPile = document.getElementById('drawPile');
-    drawPile.innerHTML = '';
-    const pileCard = document.createElement('div');
-    pileCard.className = 'minicard facedown';
-    pileCard.innerHTML = `<div class="mi-icon">🂠</div><div class="mi-name">колода</div>`;
-    drawPile.appendChild(pileCard);
-    document.getElementById('drawMeta').textContent = (room.deck ? room.deck.length : 0) + ' карт в колоде';
-    pileCard.addEventListener('click', drawCard);
-    Evo.Drag.makeDraggable(pileCard, { kind:'deck' }, handleDrop);
+  function renderOpponents(opponents) {
+    const carousel = document.getElementById('opponentCarousel');
+    carousel.innerHTML = '';
 
-    // --- hand ---
-    const handRow = document.getElementById('handRow');
-    handRow.innerHTML = '';
-    handRow.classList.toggle('empty', myHand.length === 0);
-    myHand.forEach(card=>{
-      const el = cardEl(card);
-      Evo.Drag.makeDraggable(el, { kind:'hand', uid: card.uid }, handleDrop);
-      handRow.appendChild(el);
-    });
-    markDropzone(handRow, { zoneType: 'hand' });
-    document.getElementById('handCount').textContent = myHand.length + ' карт';
+    if (opponents.length === 0) {
+      carousel.innerHTML = '<div class="empty-opponent">Ожидание соперников…</div>';
+      updateCarousel(0);
+      return;
+    }
 
-    // --- discard (own) ---
-    const discardRow = document.getElementById('discardRow');
-    discardRow.innerHTML = '';
-    discardRow.classList.toggle('empty', myDiscard.length === 0);
-    myDiscard.slice(-8).forEach(card => discardRow.appendChild(cardEl(card, { locked:true })));
-    markDropzone(discardRow, { zoneType: 'discard' });
-    document.getElementById('discardCount').textContent = myDiscard.length + ' карт';
+    opponents.forEach((p, idx) => {
+      const slot = document.createElement('div');
+      slot.className = 'opponent-slot';
+      slot.dataset.index = idx;
 
-    // --- all players' tables ---
-    const allTables = document.getElementById('allTables');
-    allTables.innerHTML = '';
-    room.players.forEach(p=>{
-      // ИСПРАВЛЕНИЕ: защита от undefined-массивов для каждого игрока
+      const name = document.createElement('div');
+      name.className = 'opponent-name';
+      name.textContent = p.name;
+      slot.appendChild(name);
+
+      const tableRow = document.createElement('div');
+      tableRow.className = 'opponent-table';
+      markDropzone(tableRow, { zoneType: 'newspecies', zonePlayer: p.id });
+
       const table = p.table || [];
-
-      const zone = document.createElement('div');
-      zone.className = 'zone' + (p.id === Evo.Session.playerId ? ' mine' : '');
-      const h3 = document.createElement('h3');
-      h3.innerHTML = `<span>Стол — <span class="pname">${p.name}${p.id===Evo.Session.playerId?' (вы)':''}</span></span><span class="mono">${table.length} видов</span>`;
-      zone.appendChild(h3);
-
-      const row = document.createElement('div');
-      row.className = 'cardrow' + (table.length === 0 ? ' empty' : '');
-      markDropzone(row, { zoneType: 'newspecies', zonePlayer: p.id });
-
-      table.forEach((sp, idx)=>{
-        // ИСПРАВЛЕНИЕ: защита от undefined-массива свойств вида
-        const props = sp.props || [];
-
-        const wrap = document.createElement('div');
-        wrap.className = 'species';
-        markDropzone(wrap, { zoneType: 'attach', zonePlayer: p.id, zoneSpecies: idx });
-        wrap.appendChild(cardEl(sp.card, { facedown:true, locked:true }));
-        const tags = document.createElement('div');
-        tags.className = 'taglist';
-        props.forEach(pc=>{
-          const face = Evo.getFace(pc);
-          const t = document.createElement('span');
-          t.className = 'tag';
-          t.textContent = face.icon + ' ' + face.name;
-          tags.appendChild(t);
-        });
-        wrap.appendChild(tags);
-        const lbl = document.createElement('div');
-        lbl.className = 'lbl'; lbl.textContent = 'вид №' + (idx+1);
-        wrap.appendChild(lbl);
-        row.appendChild(wrap);
+      table.forEach((sp, sIdx) => {
+        tableRow.appendChild(createSpeciesCard(sp, sIdx, p.id, 'opponent'));
       });
-      zone.appendChild(row);
-      allTables.appendChild(zone);
+
+      slot.appendChild(tableRow);
+      carousel.appendChild(slot);
     });
+
+    updateCarousel(opponents.length);
+  }
+
+  function createSpeciesCard(sp, idx, playerId, owner) {
+    const props = sp.props || [];
+    const wrap = document.createElement('div');
+    wrap.className = 'species ' + (owner === 'player' ? 'player-species' : 'opponent-species');
+    markDropzone(wrap, { zoneType: 'attach', zonePlayer: playerId, zoneSpecies: idx });
+
+    // Анимация появления с задержкой
+    wrap.style.animation = 'cardAppear 0.4s ease ' + (idx * 0.06) + 's both';
+
+    if (owner === 'player') {
+      // Props сверху (к зоне ивентов / центру)
+      wrap.appendChild(createTagList(props));
+      // Карта снизу
+      wrap.appendChild(cardEl(sp.card, { facedown: true, locked: true }));
+      // Метка
+      const lbl = document.createElement('div');
+      lbl.className = 'lbl';
+      lbl.textContent = 'вид №' + (idx + 1);
+      wrap.appendChild(lbl);
+    } else {
+      // Карта сверху
+      wrap.appendChild(cardEl(sp.card, { facedown: true, locked: true }));
+      // Props снизу (к зоне ивентов / центру)
+      wrap.appendChild(createTagList(props));
+      // Метка
+      const lbl = document.createElement('div');
+      lbl.className = 'lbl';
+      lbl.textContent = 'вид №' + (idx + 1);
+      wrap.appendChild(lbl);
+    }
+
+    return wrap;
+  }
+
+  function createTagList(props) {
+    const tags = document.createElement('div');
+    tags.className = 'taglist';
+    props.forEach(pc => {
+      const face = Evo.getFace(pc);
+      const t = document.createElement('span');
+      t.className = 'tag';
+      t.textContent = face.icon + ' ' + face.name;
+      tags.appendChild(t);
+    });
+    return tags;
+  }
+
+  function updateCarousel(total) {
+    const carousel = document.getElementById('opponentCarousel');
+    const left = document.getElementById('oppArrowLeft');
+    const right = document.getElementById('oppArrowRight');
+
+    if (window.innerWidth > 900 || total <= 1) {
+      carousel.classList.remove('carousel-mode');
+      left.style.display = 'none';
+      right.style.display = 'none';
+      carousel.style.transform = '';
+      return;
+    }
+
+    carousel.classList.add('carousel-mode');
+    left.style.display = 'flex';
+    right.style.display = 'flex';
+    left.disabled = currentOppIdx === 0;
+    right.disabled = currentOppIdx >= total - 1;
+
+    carousel.style.transform = `translateX(-${currentOppIdx * 100}%)`;
+  }
+
+  function renderPlayerTable(me) {
+    const container = document.getElementById('playerTable');
+    container.innerHTML = '';
+    markDropzone(container, { zoneType: 'newspecies', zonePlayer: me.id });
+
+    const table = me.table || [];
+    table.forEach((sp, idx) => {
+      container.appendChild(createSpeciesCard(sp, idx, me.id, 'player'));
+    });
+
+    if (table.length === 0) {
+      const hint = document.createElement('div');
+      hint.className = 'table-hint';
+      hint.textContent = 'Перетащите карту сюда, чтобы создать новый вид';
+      container.appendChild(hint);
+    }
+  }
+
+  function renderDeck() {
+    const pile = document.getElementById('drawPile');
+    pile.innerHTML = '';
+
+    const deckCount = room.deck ? room.deck.length : 0;
+    const visibleCards = Math.min(3, Math.max(1, deckCount));
+
+    for (let i = 0; i < visibleCards; i++) {
+      const card = document.createElement('div');
+      card.className = 'minicard facedown';
+      card.innerHTML = `<div class="mi-icon">🂠</div><div class="mi-name">колода</div>`;
+      card.style.position = 'absolute';
+      card.style.top = (i * 2) + 'px';
+      card.style.left = (i * 2) + 'px';
+      card.style.zIndex = visibleCards - i;
+      card.style.transform = `rotate(${(i - 1) * 1.2}deg)`;
+
+      if (i === 0) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', drawCard);
+        Evo.Drag.makeDraggable(card, { kind: 'deck' }, handleDrop);
+      } else {
+        card.style.pointerEvents = 'none';
+        card.style.opacity = (0.9 - i * 0.08).toString();
+      }
+      pile.appendChild(card);
+    }
+  }
+
+  function renderHand(hand) {
+    const row = document.getElementById('handRow');
+    row.innerHTML = '';
+
+    hand.forEach((card, idx) => {
+      const el = cardEl(card);
+      el.style.animation = 'cardAppear 0.3s ease ' + (idx * 0.04) + 's both';
+      Evo.Drag.makeDraggable(el, { kind: 'hand', uid: card.uid }, handleDrop);
+      row.appendChild(el);
+    });
+
+    if (hand.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'hand-empty';
+      empty.textContent = 'Пусто';
+      row.appendChild(empty);
+    }
   }
 
   function drawCard(){
