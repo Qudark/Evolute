@@ -64,8 +64,8 @@ Evo.Drag = (function(){
       clearZoneHighlight();
 
       const zone = zoneUnder(ev.clientX, ev.clientY);
-      cleanup();
 
+      // ИСПРАВЛЕНИЕ: сначала вызываем колбэк, ПОТОМ чистим
       if (zone && onDropCb){
         onDropCb(payload, {
           type: zone.dataset.zoneType,
@@ -73,6 +73,8 @@ Evo.Drag = (function(){
           speciesIdx: zone.dataset.zoneSpecies,
         });
       }
+
+      cleanup();
       active = false;
     }
 
