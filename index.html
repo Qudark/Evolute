@@ -8,12 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 
-<!-- Telegram Mini Apps SDK — не мешает, если открыто не в Telegram -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<!-- Firebase (нужно только если заполнен js/config.js — см. README) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<base target="_blank">
 </head>
 <body>
 
@@ -108,40 +106,73 @@
 
     <div id="boardBlock" style="display:none;">
 
+      <!-- Фазы хода -->
       <div class="phasebar">
-        <div class="label">Стадия хода</div>
         <div class="phase-track" id="phaseTrack"></div>
         <div class="phase-detail" id="phaseDetail"></div>
       </div>
 
-      <div class="setup-bar">
-        <span class="mono" id="drawMeta" style="font-size:11px;color:#93a89a;"></span>
-        <span class="sync-tag" id="lobbySync2" style="margin-left:8px;"></span>
-        <div class="foodbank">
-          <span class="mono" style="font-size:10.5px;color:#93a89a;">КОРМОВАЯ БАЗА</span>
-          <button id="foodMinus">–</button>
-          <span class="count mono" id="foodCount">0</span>
-          <button id="foodPlus">+</button>
+      <!-- Игровой стол -->
+      <div class="game-table">
+
+        <!-- Зона соперников -->
+        <div class="opponent-strip" id="opponentStrip">
+          <div class="opponent-carousel" id="opponentCarousel"></div>
+          <button class="carousel-arrow left" id="oppArrowLeft" aria-label="Предыдущий">‹</button>
+          <button class="carousel-arrow right" id="oppArrowRight" aria-label="Следующий">›</button>
         </div>
+
+        <!-- Разделитель зоны ивентов -->
+        <div class="event-strip">
+          <div class="event-line"></div>
+        </div>
+
+        <!-- Нижняя часть: игрок + сайдбар -->
+        <div class="bottom-strip">
+
+          <div class="player-area">
+            <div class="player-table" id="playerTable"></div>
+          </div>
+
+          <div class="side-bar">
+            <div class="side-block deck-block">
+              <span class="side-title">Колода</span>
+              <div class="deck-visual" id="drawPile"></div>
+              <span class="side-meta" id="drawMeta"></span>
+            </div>
+
+            <div class="side-block hand-block">
+              <span class="side-title">Рука <span id="handCount"></span></span>
+              <div class="hand-visual" id="handRow"></div>
+            </div>
+
+            <div class="side-block controls-block">
+              <button class="btn-dots" id="menuDots" title="Меню">⋮⋮⋮</button>
+              <div class="controls-popup" id="controlsPopup">
+                <button class="ctrl-btn" data-view="home">🏠 Меню</button>
+                <button class="ctrl-btn" data-view="catalog">📚 Каталог</button>
+                <div class="ctrl-sep"></div>
+                <div class="foodbank">
+                  <span>Корм</span>
+                  <button id="foodMinus">−</button>
+                  <span id="foodCount">0</span>
+                  <button id="foodPlus">+</button>
+                </div>
+                <div class="ctrl-sep"></div>
+                <div class="discard-info">
+                  <span>Сброс: <b id="discardCount">0</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="zone">
-        <h3><span>Колода — перетащите карту в руку, чтобы взять</span></h3>
-        <div class="cardrow" id="drawPile"></div>
+      <div class="sync-strip">
+        <span class="sync-tag" id="lobbySync2"></span>
       </div>
-
-      <div class="zone mine">
-        <h3><span>Ваша рука — <span class="pname" id="myNameLabel"></span></span><span class="mono" id="handCount"></span></h3>
-        <div class="cardrow" id="handRow"></div>
-      </div>
-
-      <div id="allTables"></div>
-
-      <div class="zone mine">
-        <h3><span>Ваш сброс</span><span class="mono" id="discardCount"></span></h3>
-        <div class="cardrow" id="discardRow"></div>
-      </div>
-
     </div>
   </div>
 
@@ -151,7 +182,6 @@
   ВИЗУАЛЬНЫЙ ПРОТОТИП, ВДОХНОВЛЁННЫЙ КЛАССИЧЕСКОЙ НАСТОЛЬНОЙ ИГРОЙ «ЭВОЛЮЦИЯ» · СТОЛ НЕ ПРОВЕРЯЕТ ИГРОВЫЕ ПРАВИЛА — РАСКЛАДКА КАРТ ПОЛНОСТЬЮ РУЧНАЯ, ПЕРЕТАСКИВАНИЕМ · СМ. README.md ДЛЯ БЕСПЛАТНОГО ДЕПЛОЯ И ПОДКЛЮЧЕНИЯ К TELEGRAM
 </footer>
 
-<!-- Порядок важен: data → telegram → config → storage → drag → catalog → lobby → board → main -->
 <script src="js/data.js"></script>
 <script src="js/telegram.js"></script>
 <script src="js/config.js"></script>
