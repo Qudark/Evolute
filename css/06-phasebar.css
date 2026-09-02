@@ -1,0 +1,20 @@
+/* ============================================================
+   06 · PHASE BAR — индикатор фаз хода над столом.
+   ============================================================ */
+.phasebar{padding:10px 0 6px;border-bottom:1px solid var(--line);margin-bottom:10px;}
+.phase-track{display:flex;gap:6px;flex-wrap:wrap;}
+.phase-pill{flex:1 1 120px;display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);cursor:pointer;transition:.15s;}
+.phase-pill:hover{border-color:#48664f;}
+.phase-pill.active{border-color:var(--c-growth);background:linear-gradient(180deg,var(--c-growth-soft),var(--panel));}
+.phase-pill .num{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:#7d9787;width:18px;}
+.phase-pill.active .num{color:var(--c-growth);}
+.phase-pill .txt strong{display:block;font-size:11px;font-weight:600;color:var(--bone);}
+.phase-detail{margin-top:8px;font-size:12px;line-height:1.5;color:#c7d6cb;}
+.phase-detail b{color:var(--c-growth);}
+
+@media (max-width: 900px) {
+  .phase-pill { flex: 1 1 80px; padding: 5px 8px; }
+  .phase-pill .num { font-size: 13px; width: 16px; }
+  .phase-pill .txt strong { font-size: 10px; }
+  .phase-detail { font-size: 11px; }
+}
