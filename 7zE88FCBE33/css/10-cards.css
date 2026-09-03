@@ -1,0 +1,135 @@
+/* ============================================================
+   10 · CARDS — вид (species) на столе, теги свойств, базовая
+   карточка (.minicard) и визуал перетаскивания/drop-зон.
+   ============================================================ */
+.species {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(13, 23, 18, 0.45);
+  border: 1px solid transparent;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  min-width: 105px;
+  animation: cardAppear 0.4s ease both;
+}
+
+.species:hover {
+  border-color: var(--line);
+  background: rgba(13, 23, 18, 0.65);
+  transform: translateY(-2px);
+}
+
+.player-species .taglist { margin-bottom: 3px; }
+.opponent-species .taglist { margin-top: 3px; }
+
+/* Tags */
+.taglist {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  max-width: 115px;
+}
+
+.tag {
+  font-size: 9px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: #c7d6cb;
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+  transition: transform 0.15s, background 0.15s;
+  cursor: default;
+}
+
+.tag:hover { transform: scale(1.06); background: #2a4530; }
+
+.lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8.5px;
+  color: #7d9787;
+  margin-top: 1px;
+  letter-spacing: 0.5px;
+}
+
+/* ===== MINICARD ===== */
+.minicard {
+  width: 86px;
+  height: 118px;
+  border-radius: 10px;
+  position: relative;
+  cursor: grab;
+  border: 1px solid rgba(0,0,0,0.35);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px 5px;
+  background: var(--paper);
+  color: var(--ink);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.15s;
+  flex: none;
+  touch-action: none;
+  user-select: none;
+}
+
+.minicard:hover {
+  transform: translateY(-5px) scale(1.04);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.minicard:active { cursor: grabbing; }
+
+.minicard .mi-icon { font-size: 24px; line-height: 1; }
+.minicard .mi-name { font-size: 9.5px; font-weight: 700; margin-top: 5px; line-height: 1.15; }
+
+.minicard.facedown {
+  background: repeating-linear-gradient(135deg, rgba(0,0,0,0.07) 0 2px, transparent 2px 12px), var(--paper-2);
+}
+.minicard.facedown .mi-icon { font-size: 28px; opacity: 0.85; }
+.minicard.facedown .mi-name { font-style: italic; color: var(--ink-soft); font-weight: 500; }
+
+.minicard.locked { cursor: default; opacity: 0.95; }
+
+/* Dropzone */
+.dropzone-active {
+  background: rgba(92, 138, 82, 0.12) !important;
+  outline: 2px dashed var(--c-growth);
+  outline-offset: 3px;
+  border-radius: 12px;
+  animation: pulseGlow 1.5s ease infinite;
+}
+
+/* Drag ghost */
+.drag-ghost {
+  opacity: 0.95 !important;
+  transform: scale(1.12) rotate(-5deg) !important;
+  box-shadow: 0 28px 56px rgba(0,0,0,0.6) !important;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+@media (max-width: 900px) {
+  .species {
+    min-width: 92px;
+    padding: 6px 8px;
+  }
+
+  .minicard {
+    width: 74px;
+    height: 100px;
+  }
+
+  .minicard .mi-icon { font-size: 20px; }
+  .minicard .mi-name { font-size: 9px; }
+
+  .tag { font-size: 8px; padding: 1px 5px; }
+  .lbl { font-size: 8px; }
+}
