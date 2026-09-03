@@ -1,15 +1,42 @@
 /* ============================================================
    07 · GAME TABLE — фон стола (сукно) и три зоны, строго
-   сверху вниз: соперники → пустой стол → игрок. Пропорции
-   зон заданы через flex-grow (см. .opponent-strip/.mid-zone/
-   .player-zone) — при изменении размера окна все три зоны
-   растут/сжимаются вместе, а не только одна из них.
+   сверху вниз: соперники → пустой стол → игрок.
+
+   Важно: пропорциональными (flex-grow) сделаны только зоны со
+   СПИСОЧНЫМ содержимым переменной высоты — .opponent-strip и
+   .player-table (см. 08-player-area.css) — у них ещё и есть
+   min-height + overflow-y:auto, поэтому при нехватке места они
+   скроллятся, а не обрезают контент. Зоны с содержимым
+   ФИКСИРОВАННОГО размера — .mid-zone (колода/сброс) и рука
+   (.hand-strip, см. 13-hand.css) — НЕ участвуют в пропорции
+   (flex: 0 0 auto), поэтому их никогда не сжимает общий расчёт
+   пропорций ниже нужного им размера. Раньше все зоны одинаково
+   тянулись через flex-grow, из-за чего фиксированный по размеру
+   контент (колода, рука) мог оказаться зажат меньше своего
+   реального размера и визуально "прятался" за границей зоны.
+
+   Второе условие для этого: #boardBlock (родитель .game-table)
+   САМ должен быть flex-контейнером-колонкой с определённой
+   высотой — иначе flex:1 у .game-table не от чего считать (flex
+   работает только внутри flex-контекста, который создаёт родитель).
+   Раньше #boardBlock был обычным div без display:flex, поэтому
+   вся пропорциональная схема ниже физически не имела эффекта, и
+   .game-table просто сжималась/обрезалась по своим детям.
    ============================================================ */
+#lobbyBlock, #boardBlock {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#lobbyBlock { overflow-y: auto; }
+#boardBlock { overflow: hidden; }
+
 .game-table {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 150px);
-  min-height: 460px;
+  flex: 1;
+  min-height: 0;
   background:
     radial-gradient(ellipse at 30% 20%, rgba(35, 65, 40, 0.35) 0%, transparent 60%),
     radial-gradient(ellipse at 70% 80%, rgba(30, 55, 35, 0.35) 0%, transparent 60%),
@@ -32,13 +59,37 @@
   z-index: 0;
 }
 
-/* ===== ЗОНА 1 · ОППОНЕНТЫ ===== */
+/* ===== ВЕРХНЯЯ СТРОКА СТОЛА (внутри игрового экрана, не сайта):
+   код комнаты, статус синхронизации, меню "⋮" ===== */
+.ingame-topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 2px 8px;
+}
+.ingame-topbar .room-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 14px 6px 8px;
+  font-size: 12.5px;
+}
+.ingame-topbar .room-chip .code { font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--c-growth); letter-spacing:2px; }
+.ingame-topbar .room-chip .you { color:#93a89a; }
+.ingame-topbar .sync-tag { font-size: 10.5px; color:#7d9787; }
+
+/* ===== ЗОНА 1 · ОППОНЕНТЫ (пропорциональная, со скроллом) ===== */
 .opponent-strip {
   position: relative;
-  padding: 14px 18px 6px;
+  padding: 12px 16px 6px;
   z-index: 1;
   flex: 1 1 0;
-  min-height: 0;
+  min-height: 60px;
   overflow-y: auto;
 }
 
@@ -85,7 +136,7 @@
   gap: 12px;
   justify-content: center;
   align-items: flex-start;
-  min-height: 170px;
+  min-height: 140px;
   padding: 8px;
   border-radius: 12px;
   transition: background 0.2s;
@@ -126,15 +177,17 @@
 .carousel-arrow.left { left: 6px; }
 .carousel-arrow.right { right: 6px; }
 
-/* ===== ЗОНА 2 · ПУСТОЙ СТОЛ (сброс слева, колода справа) ===== */
+/* ===== ЗОНА 2 · ПУСТОЙ СТОЛ (сброс слева, колода справа).
+   Размер зоны определяется её содержимым (flex: 0 0 auto) —
+   она НЕ участвует в пропорциональном растяжении, поэтому колода
+   и сброс никогда не сжимаются меньше своего реального размера. ===== */
 .mid-zone {
   position: relative;
-  flex: 0.85 1 0;
-  min-height: 90px;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
+  padding: 10px 26px;
   z-index: 1;
 }
 
@@ -165,15 +218,12 @@
 }
 
 @media (max-width: 900px) {
-  .game-table {
-    height: calc(100vh - 150px);
-    border-radius: 12px;
-    min-height: 420px;
+  .opponent-strip {
+    padding: 6px 10px 4px;
+    min-height: 46px;
   }
 
-  .opponent-strip {
-    padding: 8px 10px 4px;
-  }
+  .opponent-table { min-height: 108px; }
 
   .opponent-name {
     font-size: 12px;
@@ -187,6 +237,9 @@
   }
 
   .mid-zone {
-    padding: 0 14px;
+    padding: 6px 12px;
   }
+
+  .ingame-topbar { padding: 0 0 6px; }
+  .ingame-topbar .room-chip { padding: 4px 10px 4px 6px; font-size: 11px; }
 }

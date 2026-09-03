@@ -12,12 +12,13 @@
   --radius:10px; --shadow:0 10px 30px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none;}
 body{
   background:radial-gradient(ellipse at 15% 0%, #16281d 0%, transparent 55%),
              radial-gradient(ellipse at 85% 100%, #14251b 0%, transparent 55%), var(--bg);
-  color:var(--bone); font-family:'Inter',sans-serif; min-height:100vh;
+  color:var(--bone); font-family:'Inter',sans-serif;
   touch-action:manipulation;
+  display:flex; flex-direction:column; /* весь сайт — один экран-приложение, без прокрутки страницы */
 }
 .mono{font-family:'IBM Plex Mono',monospace;}
 button{font-family:'Inter',sans-serif;}
