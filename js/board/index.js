@@ -25,7 +25,6 @@ export function enter(initialRoom){
   document.getElementById('roomBadgeCode').textContent = session.code;
   document.getElementById('roomBadgeYou').textContent = '· ' + session.name;
   document.getElementById('navGame').disabled = false;
-  document.getElementById('menuDots').style.display = 'flex';
 
   if (unsubscribe) unsubscribe();
   unsubscribe = Storage.subscribe(session.code, (freshRoom) => {
