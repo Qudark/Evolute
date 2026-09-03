@@ -12,6 +12,11 @@ let active = false;
 
 export function isDragging(){ return active; }
 
+/* Позволяет другим модулям (например, жесту руки-гармошки в
+   hand-view.js, у которого своя, более сложная логика перетаскивания)
+   пометить "идёт перетаскивание" без использования makeDraggable(). */
+export function setActive(v){ active = !!v; }
+
 export function makeDraggable(el, data, onDrop){
   el.setAttribute('data-draggable', 'true');
   el.addEventListener('pointerdown', (e) => startDrag(e, el, data, onDrop));
@@ -22,6 +27,9 @@ function startDrag(e, el, payload, onDropCb){
   e.preventDefault();
   active = true;
 
+  const pointerId = e.pointerId;
+  try { el.setPointerCapture(pointerId); } catch(err){ /* не критично */ }
+
   const rect = el.getBoundingClientRect();
   const ghost = createGhost(el, rect);
   el.style.opacity = '0.35';
@@ -30,15 +38,18 @@ function startDrag(e, el, payload, onDropCb){
   const offY = e.clientY - rect.top;
 
   function move(ev){
+    if (ev.pointerId !== pointerId) return;
     moveGhost(ghost, ev.clientX - offX, ev.clientY - offY);
     const zone = zoneUnder(ev.clientX, ev.clientY, ghost);
     highlightZone(zone);
   }
 
   function up(ev){
+    if (ev.pointerId !== pointerId) return;
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', up);
     window.removeEventListener('pointercancel', up);
+    try { el.releasePointerCapture(pointerId); } catch(err){ /* не критично */ }
     clearZoneHighlight();
 
     const zone = zoneUnder(ev.clientX, ev.clientY, ghost);

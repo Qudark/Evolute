@@ -52,6 +52,5 @@ export function renderGame(){
 
   document.getElementById('foodCount').textContent = room.foodCount || 0;
   document.getElementById('discardCount').textContent = myDiscard.length;
-  document.getElementById('handCount').textContent = myHand.length;
   document.getElementById('drawMeta').textContent = (room.deck ? room.deck.length : 0) + ' карт';
 }

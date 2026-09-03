@@ -10,11 +10,13 @@ import { getSession } from '../session.js';
 import { setRoom, setRenderCallback } from './state.js';
 import { render } from './render.js';
 import { setupControls } from './controls.js';
+import { reset as resetAppearTracker } from './appear-tracker.js';
 
 let unsubscribe = null;
 let controlsReady = false;
 
 export function enter(initialRoom){
+  resetAppearTracker(); // новая партия — карты снова "появляются" красиво
   setRoom(initialRoom);
   setRenderCallback(render);
 
@@ -23,6 +25,7 @@ export function enter(initialRoom){
   document.getElementById('roomBadgeCode').textContent = session.code;
   document.getElementById('roomBadgeYou').textContent = '· ' + session.name;
   document.getElementById('navGame').disabled = false;
+  document.getElementById('menuDots').style.display = 'flex';
 
   if (unsubscribe) unsubscribe();
   unsubscribe = Storage.subscribe(session.code, (freshRoom) => {

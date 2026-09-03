@@ -3,9 +3,11 @@
    отпускают над той или иной .dropzone. Правила игры не
    проверяются: куда перетащили, туда и легло.
    ============================================================ */
+import { getType } from '../data/deck.js';
 import { getSession } from '../session.js';
 import { mutate } from './state.js';
 import { drawCard } from './deck-view.js';
+import { chooseFace } from './face-choice-popup.js';
 
 export function handleDrop(payload, zone){
   if (!zone) return;
@@ -38,6 +40,18 @@ function dropAsNewSpecies(payload, zone){
 }
 
 function dropAsProperty(payload, zone){
+  // У двусторонних карт (напр. «Паразит / Хищник») сторону теперь
+  // выбирают в момент розыгрыша, всплывающим попапом — вместо
+  // прежней кнопки-флипа прямо на карте в руке.
+  const type = getType(payload.typeId);
+  if (type.faces.length > 1){
+    chooseFace(payload.typeId, faceIdx => commitProperty(payload, zone, faceIdx));
+  } else {
+    commitProperty(payload, zone, 0);
+  }
+}
+
+function commitProperty(payload, zone, faceIdx){
   mutate(r => {
     const session = getSession();
     const me = r.players.find(p => p.id === session.playerId);
@@ -51,6 +65,7 @@ function dropAsProperty(payload, zone){
     if (!sp) return;
     if (!sp.props) sp.props = [];
     const [card] = me.hand.splice(idx, 1);
+    card.face = faceIdx;
     sp.props.push(card);
   });
 }

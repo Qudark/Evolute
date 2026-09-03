@@ -1,36 +1,13 @@
 /* ============================================================
-   board/card-view.js — рендер одной карты (.minicard): рубашкой
-   вверх (вид) или лицом вверх (свойство), с кнопкой переворота
-   для двусторонних карт.
+   board/card-view.js — рубашка карты-вида на столе (всегда
+   лицом вниз и заблокирована — сам вид не берётся в руку).
+   Лицевая сторона карты в руке рисуется в hand-view.js: там
+   другая механика (аккордеон, жест выбора), поэтому вынесена
+   в отдельный файл вместо переиспользования этого.
    ============================================================ */
-import { getType, getFace } from '../data/deck.js';
-import { getSession } from '../session.js';
-import { mutate } from './state.js';
-
-export function cardEl(card, { facedown = false, locked = false } = {}){
+export function cardEl(){
   const el = document.createElement('div');
-  el.className = 'minicard' + (facedown ? ' facedown' : '') + (locked ? ' locked' : '');
-
-  if (facedown){
-    el.innerHTML = `<div class="mi-icon">🦎</div><div class="mi-name">вид</div>`;
-    return el;
-  }
-
-  const type = getType(card.typeId);
-  const face = getFace(card);
-  el.innerHTML = `<div class="mi-icon">${face.icon}</div><div class="mi-name">${face.name}</div>` +
-    (type.faces.length > 1 ? `<div class="mi-flip" title="перевернуть карту">⟲</div>` : '');
-
-  if (type.faces.length > 1){
-    el.querySelector('.mi-flip').addEventListener('pointerdown', (e) => {
-      e.stopPropagation();
-      mutate(r => {
-        const session = getSession();
-        const me = r.players.find(p => p.id === session.playerId);
-        const c = me.hand.find(c => c.uid === card.uid);
-        if (c) c.face = c.face ? 0 : 1;
-      });
-    });
-  }
+  el.className = 'minicard facedown locked';
+  el.innerHTML = `<div class="mi-icon">🦎</div><div class="mi-name">вид</div>`;
   return el;
 }

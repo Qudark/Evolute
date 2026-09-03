@@ -1,5 +1,79 @@
 # Архитектура проекта «Эволюция — онлайн»
 
+## 0. Багфикс-лист (второй заход)
+
+Отдельным заходом исправлены 5 проблем, найденные при игре с
+телефона. Ниже — что именно изменилось и в каких файлах.
+
+1. **Анимация появления проигрывалась для всех карт при любом
+   действии.** Причина: `species-view.js` и (в старой версии)
+   `hand-view.js` навешивали `animation: cardAppear...` на КАЖДУЮ
+   карточку при КАЖДОМ рендере, а не только на реально новые.
+   Добавлен `js/board/appear-tracker.js` — множество уже показанных
+   `uid`. `shouldAnimate(uid)` возвращает `true` только один раз,
+   при первом появлении карты; `species-view.js` и `hand-view.js`
+   теперь ставят анимацию только когда он это подтверждает.
+   `board/index.js` сбрасывает трекер при входе в новую комнату,
+   чтобы первая раздача карт всё равно красиво анимировалась.
+
+2. **Карта из колоды не перетаскивалась в руку, срабатывал только
+   клик.** Причина найдена в `hand-view.js`: контейнер `#handRow`
+   никогда не помечался как `.dropzone` (`markDropzone` не
+   вызывался), хотя `deck-view.js` уже тащил карту с
+   `payload.kind === 'deck'`, а `drop-handlers.js` уже умел её
+   принимать (`zone.type === 'hand'`) — просто бросать её было
+   некуда. Теперь `renderHand()` помечает `#handRow` зоной
+   `{ zoneType: 'hand' }` при каждом рендере.
+
+3. **Рука полностью переделана под "гармошку" (как в «Дурак
+   Онлайн»).** Новая механика реализована в `hand-view.js`:
+   карты лежат внахлёст (шаг между ними считается в JS от их
+   количества — `containerWidth`/`cardCount`, зажато между
+   `MIN_STEP_RATIO` и `MAX_STEP_RATIO` от ширины карты), значок
+   свойства — в левом верхнем углу карты (виден всегда, даже под
+   перекрытием), название второй грани — под ним. Жест: зажали →
+   карта поднимается и показывает имя (`.selected`) → двигаем
+   палец влево/вправо → выбор переходит на карту под пальцем
+   (`nearestIndex()`) → тянем от точки старта вверх больше
+   `PLAY_THRESHOLD_Y` → карта "отрывается" и превращается в
+   обычный drag (используются те же `drag/ghost.js` и
+   `drag/dropzone.js`, что и для остальных перетаскиваний) →
+   отпустили над зоной — карта разыгрывается; отпустили без рывка
+   вверх — просто снимается выделение. Работает одинаково от
+   мыши и от пальца (Pointer Events). Для двусторонних карт
+   («Паразит/Хищник» и т.п.) сторону раньше выбирали кнопкой ⟲
+   прямо на карте в руке — теперь **выбор происходит в момент
+   розыгрыша карты как свойства**, всплывающим попапом
+   (`js/board/face-choice-popup.js` + `css/14-facepopup.css`);
+   старая кнопка-флип и связанный с ней код в `card-view.js`
+   убраны за ненадобностью.
+
+4. **Порядок зон стола и положение "трёх точек".** Стол теперь
+   строго три зоны сверху вниз: `.opponent-strip` (соперники) →
+   `.mid-zone` (пустой стол: сброс слева, колода справа) →
+   `.player-zone` (виды игрока сверху, его рука-гармошка снизу).
+   Старый `.side-bar` сбоку убран целиком. Кнопка "⋮" и всплывающее
+   меню (переключение вкладок, кормовая база) переехали из сайдбара
+   у стола в шапку сайта, в правый верхний угол (`.controls-block`
+   внутри `.top-right` в `index.html`, стили — в `02-layout.css`);
+   видна только когда игрок находится в комнате.
+
+5. **Пропорции зон стола.** `.game-table` — это `flex-direction:
+   column`, и раньше только нижний блок (`.bottom-strip`) был
+   `flex:1`, а зона соперников и разделитель имели фиксированную
+   высоту — при изменении окна перекраивалась только одна зона.
+   Теперь все три зоны заданы через `flex-grow` (`.opponent-strip
+   {flex:1}`, `.mid-zone {flex:0.85}`, `.player-zone {flex:1.7}`,
+   см. `07-game-table.css`/`08-player-area.css`) — они растут и
+   сжимаются вместе, сохраняя соотношение, при любом изменении
+   высоты `.game-table` (а она сама уже была отзывчивой,
+   `calc(100vh - 150px)`).
+
+Дерево файлов и остальная часть документа обновлены в соответствии
+с этими изменениями.
+
+---
+
 Этот документ описывает новую структуру кода после рефакторинга:
 разбиение на модули, поток данных между ними и то, что изменилось
 по сравнению с прежней версией. Правила самой настольной игры не
@@ -38,17 +112,19 @@ index.html
 
 css/
   01-tokens.css        — переменные (:root), сброс стилей, база шрифтов
-  02-layout.css         — шапка сайта, вкладки, .view, notice-banner
+  02-layout.css         — шапка сайта (вкладки, "три точки" + меню), .view
   03-home.css            — экран "Меню" (hero, карточки, .btn, .field)
   04-lobby.css            — зал ожидания комнаты
   05-catalog.css           — каталог карт (мозаика, чипы, флип-карточки)
   06-phasebar.css           — полоса фаз хода
-  07-game-table.css          — стол, зона соперников, карусель, event-strip
-  08-player-area.css          — нижняя полоса и ряд игрока
-  09-sidebar.css                — колода/рука/сброс/меню в сайдбаре
-  10-cards.css                   — species, теги, .minicard, drag/dropzone
-  11-misc.css                     — статус синхронизации, footer
-  12-animations.css                — общие @keyframes
+  07-game-table.css          — стол: зона соперников + пустая зона (сброс/колода)
+  08-player-area.css          — зона игрока (виды + контейнер руки)
+  09-deck-discard.css          — визуал колоды и стопки сброса
+  10-cards.css                  — species, теги, .minicard (стол), drag/dropzone
+  11-misc.css                    — статус синхронизации, footer
+  12-animations.css               — общие @keyframes
+  13-hand.css                      — карты руки-гармошки (см. п.3 багфикс-листа)
+  14-facepopup.css                  — попап выбора стороны двусторонней карты
 
 js/
   main.js               — точка входа (DOMContentLoaded)
@@ -89,24 +165,26 @@ js/
   board/
     state.js                    — комната в памяти, myPlayer(), mutate()
     dropzone-utils.js             — markDropzone() — общий помощник
-    sync-tag.js                     — статус синхронизации
-    lobby-view.js                     — зал ожидания + запуск партии
-    phase-track.js                      — полоса фаз хода
-    card-view.js                          — рендер одной карты + флип
-    species-view.js                         — вид на столе + теги свойств
-    opponents-view.js                         — карусель соперников
-    player-table-view.js                        — свой ряд видов
-    deck-view.js                                  — колода + drawCard()
-    hand-view.js                                    — рука игрока
-    drop-handlers.js                                  — что куда переносится
-    controls.js                                         — разовая настройка DOM
-    render.js                                             — оркестратор рендера
-    index.js                                                — публичный API стола
+    appear-tracker.js               — какие uid уже анимировались (п.1 багфикса)
+    sync-tag.js                       — статус синхронизации
+    lobby-view.js                       — зал ожидания + запуск партии
+    phase-track.js                        — полоса фаз хода
+    card-view.js                            — рубашка карты-вида на столе
+    species-view.js                           — вид на столе + теги свойств
+    opponents-view.js                           — карусель соперников
+    player-table-view.js                          — свой ряд видов
+    deck-view.js                                    — колода + drawCard()
+    hand-view.js                                      — рука-гармошка (п.2/3 багфикса)
+    face-choice-popup.js                                — выбор стороны при розыгрыше
+    drop-handlers.js                                      — что куда переносится
+    controls.js                                             — разовая настройка DOM
+    render.js                                                 — оркестратор рендера
+    index.js                                                    — публичный API стола
 ```
 
-Итого: **12 CSS-файлов** (было 1) и **36 JS-модулей** (было 9).
-Каждый JS-файл — от 8 до 110 строк, каждый CSS-файл — от 11 до
-275 строк (275 занимает `09-sidebar.css`, самый насыщенный экран).
+Итого: **14 CSS-файлов** и **38 JS-модулей** (в исходной версии до
+рефакторинга было 1 и 9 соответственно). Каждый JS-файл — от 8 до
+150 строк, каждый CSS-файл — от 11 до ~200 строк.
 
 ## 3. Поток зависимостей (кто кого импортирует)
 
@@ -123,13 +201,21 @@ drag/*         — не зависит от игровых данных
 catalog/*      — зависит от data/*
 lobby/*        — зависит от storage/*, session.js, codegen.js
         ↓
-board/state.js — зависит от storage/*, session.js
+board/state.js, appear-tracker.js — зависят от storage/*, session.js
 board/*-view.js, card-view.js, species-view.js,
-  phase-track.js, lobby-view.js, deck-view.js,
-  drop-handlers.js — зависят от state.js, data/*, drag/*
+  phase-track.js, lobby-view.js, deck-view.js — зависят от
+  state.js, appear-tracker.js, data/*, drag/*
+board/face-choice-popup.js — зависит от data/deck.js (getType)
+board/drop-handlers.js — зависит от state.js, deck-view.js (drawCard),
+  face-choice-popup.js
+board/hand-view.js — зависит от appear-tracker.js, drag/ghost.js и
+  drag/dropzone.js напрямую (своя, более сложная логика жеста —
+  не через общий drag/index.js.makeDraggable), плюс drag/index.js
+  только за setActive()
 board/render.js — собирает все *-view.js и drop-handlers.js
 board/controls.js — зависит от render.js, opponents-view.js, drop-handlers.js
-board/index.js  — зависит от render.js, controls.js, state.js, storage/*, drag/*
+board/index.js  — зависит от render.js, controls.js, state.js,
+  appear-tracker.js, storage/*, drag/*
         ↓
 main.js         — зависит от board/index.js, lobby/index.js, catalog/index.js
 ```

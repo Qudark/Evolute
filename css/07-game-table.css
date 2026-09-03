@@ -1,12 +1,15 @@
 /* ============================================================
-   07 · GAME TABLE — фон стола (сукно), зона соперников с
-   каруселью и разделительная "зона ивентов".
+   07 · GAME TABLE — фон стола (сукно) и три зоны, строго
+   сверху вниз: соперники → пустой стол → игрок. Пропорции
+   зон заданы через flex-grow (см. .opponent-strip/.mid-zone/
+   .player-zone) — при изменении размера окна все три зоны
+   растут/сжимаются вместе, а не только одна из них.
    ============================================================ */
 .game-table {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 150px);
-  min-height: 420px;
+  min-height: 460px;
   background:
     radial-gradient(ellipse at 30% 20%, rgba(35, 65, 40, 0.35) 0%, transparent 60%),
     radial-gradient(ellipse at 70% 80%, rgba(30, 55, 35, 0.35) 0%, transparent 60%),
@@ -29,12 +32,14 @@
   z-index: 0;
 }
 
-/* ===== OPPONENT STRIP ===== */
+/* ===== ЗОНА 1 · ОППОНЕНТЫ ===== */
 .opponent-strip {
   position: relative;
   padding: 14px 18px 6px;
   z-index: 1;
-  flex-shrink: 0;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .opponent-carousel {
@@ -121,41 +126,49 @@
 .carousel-arrow.left { left: 6px; }
 .carousel-arrow.right { right: 6px; }
 
-/* ===== EVENT STRIP ===== */
-.event-strip {
+/* ===== ЗОНА 2 · ПУСТОЙ СТОЛ (сброс слева, колода справа) ===== */
+.mid-zone {
   position: relative;
-  height: 32px;
+  flex: 0.85 1 0;
+  min-height: 90px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  justify-content: space-between;
+  padding: 0 28px;
   z-index: 1;
 }
 
 .event-line {
-  width: 92%;
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 50%;
   height: 0;
   border-top: 2px dashed var(--line);
-  opacity: 0.5;
-  position: relative;
+  opacity: 0.4;
+  z-index: 0;
 }
 
-.event-line::after {
-  content: '◆';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--line);
-  font-size: 7px;
-  opacity: 0.4;
+.discard-slot, .deck-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1;
+}
+
+.mid-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: #7d9787;
+  letter-spacing: 0.5px;
 }
 
 @media (max-width: 900px) {
   .game-table {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 150px);
     border-radius: 12px;
-    min-height: 360px;
+    min-height: 420px;
   }
 
   .opponent-strip {
@@ -171,5 +184,9 @@
     width: 30px;
     height: 30px;
     font-size: 16px;
+  }
+
+  .mid-zone {
+    padding: 0 14px;
   }
 }
