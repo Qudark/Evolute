@@ -1,7 +1,7 @@
 /* ============================================================
    main.js — точка входа. Инициализирует Telegram-обвязку и
-   выбор бэкенда хранилища, включает верхнюю навигацию, рисует
-   каталог карт и передаёт lobby.js колбэк входа в комнату.
+   выбор бэкенда хранилища, включает нижнюю панель вкладок,
+   рисует каталог карт и передаёт lobby.js колбэк входа в комнату.
    ============================================================ */
 import * as TG from './telegram.js';
 import * as Storage from './storage/index.js';
@@ -30,7 +30,6 @@ function init(){
   document.querySelectorAll('nav.tabs button').forEach(btn => {
     btn.addEventListener('click', () => { if (!btn.disabled) setView(btn.dataset.view); });
   });
-  document.getElementById('homeLink').addEventListener('click', () => setView('home'));
 
   Lobby.init(enterRoom);
   Catalog.render();
