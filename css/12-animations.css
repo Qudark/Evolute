@@ -1,0 +1,18 @@
+/* ============================================================
+   12 · ANIMATIONS — общие keyframes, используемые в других
+   файлах (карточки, попап меню, подсветка drop-зоны).
+   ============================================================ */
+@keyframes cardAppear {
+  from { opacity: 0; transform: scale(0.75) translateY(25px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes popupIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { outline-color: rgba(92, 138, 82, 0.6); }
+  50% { outline-color: rgba(92, 138, 82, 1); }
+}
