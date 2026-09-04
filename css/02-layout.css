@@ -1,0 +1,65 @@
+/* ============================================================
+   02 · LAYOUT — каркас веб-приложения (не сайта): без хедера,
+   без футера, без прокрутки страницы. Просто область с текущим
+   экраном сверху и панель вкладок снизу, как в мобильном приложении.
+   ============================================================ */
+.app-content{
+  flex:1; min-height:0; position:relative; overflow:hidden;
+}
+.view{ display:none; height:100%; }
+.view.active{ display:flex; flex-direction:column; height:100%; overflow-y:auto; padding:14px clamp(12px,4vw,32px); }
+
+/* Экран стола сам управляет своим внутренним скроллом по зонам —
+   внешняя прокрутка ему не нужна, но остаётся страховкой на очень
+   маленьких экранах, чтобы контент не обрезался, а был доскроллен. */
+#view-game.active{ padding:8px clamp(8px,3vw,20px) 10px; }
+
+/* ===== нижняя панель вкладок (замена шапке-сайту) ===== */
+nav.tabs.bottom-tabs{
+  flex:0 0 auto;
+  display:flex;
+  border-top:1px solid var(--line);
+  background:var(--panel);
+  padding-bottom:env(safe-area-inset-bottom, 0);
+}
+nav.tabs.bottom-tabs button{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+  background:transparent; border:none; color:#7d9787;
+  padding:9px 4px 8px; font-size:10.5px; font-weight:600; cursor:pointer; transition:.15s;
+}
+nav.tabs.bottom-tabs button .tab-icon{ font-size:19px; line-height:1; }
+nav.tabs.bottom-tabs button.active{ color:var(--c-growth); }
+nav.tabs.bottom-tabs button:disabled{ opacity:.35; cursor:not-allowed; }
+
+.notice-banner{
+  display:none;background:var(--c-attack-soft);border:1px solid var(--c-attack);border-radius:10px;
+  padding:10px 12px;font-size:11.5px;color:#f0c7b3;line-height:1.5;margin-bottom:14px;
+}
+
+/* ===== "три точки" — меню в игровом экране (кормовая база и т.п.),
+   раньше жило в шапке сайта, теперь — прямо в верхней строке стола. ===== */
+.controls-block{position:relative;}
+
+.btn-dots{
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+  color:var(--bone);font-size:17px;cursor:pointer;transition:all .2s;
+  font-family:'IBM Plex Mono',monospace;line-height:1;
+}
+.btn-dots:hover{background:var(--c-growth-soft);border-color:var(--c-growth);color:var(--c-growth);}
+
+.controls-popup{
+  position:absolute;top:calc(100% + 8px);right:0;width:170px;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;
+  display:none;flex-direction:column;gap:3px;box-shadow:0 12px 36px rgba(0,0,0,.45);
+  z-index:80;animation:popupIn .2s ease both;
+}
+.controls-popup.open{display:flex;}
+
+.foodbank{display:flex;align-items:center;justify-content:center;gap:8px;padding:4px;}
+.foodbank span{font-size:11px;color:#93a89a;}
+.foodbank button{
+  width:26px;height:26px;border-radius:6px;border:1px solid var(--line);background:var(--bg-2);
+  color:var(--bone);cursor:pointer;font-size:14px;transition:all .15s;
+}
+.foodbank button:hover{border-color:var(--c-growth);background:var(--c-growth-soft);color:var(--c-growth);}
