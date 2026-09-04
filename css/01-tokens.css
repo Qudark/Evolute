@@ -10,14 +10,45 @@
   --c-feeding:#5c8a52; --c-feeding-soft:#1e2c1c;
   --c-growth:#c99a34; --c-growth-soft:#332813;
   --radius:10px; --shadow:0 10px 30px rgba(0,0,0,.35);
+
+  /* Размеры карт — не фиксированные px, а "резиновые" clamp() от
+     min(ширины, высоты) экрана. Так карта одинаково хорошо
+     помещается и в узкий телефон, и в невысокое окно на ПК
+     (например, широкий, но короткий браузер) — переключение между
+     "телефонным" и "десктопным" видом происходит плавно само по
+     себе, по реальным пропорциям экрана, а не по одной жёсткой
+     точке-breakpoint. Раньше карты имели фиксированный px-размер
+     с одним запасным вариантом под 900px — при нехватке именно
+     ВЫСОТЫ (например, телефон в альбомной ориентации) это никак
+     не помогало и карты обрезались. */
+  --card-w: clamp(52px, min(20vw, 11vh), 82px);
+  --card-h: clamp(72px, min(27.5vw, 15vh), 112px);
+  --hand-card-w: clamp(54px, min(21vw, 11.5vh), 84px);
+  --hand-card-h: clamp(76px, min(29vw, 15.5vh), 116px);
+  --deck-w: clamp(52px, min(20vw, 11vh), 84px);
+  --deck-h: clamp(72px, min(27.5vw, 15vh), 114px);
+  --discard-w: clamp(42px, min(16vw, 9vh), 68px);
+  --discard-h: clamp(58px, min(22vw, 12vh), 92px);
+  /* Место над картой в руке, зарезервированное под всплывающее
+     имя выбранной карты (см. 13-hand.css / board/hand-view.js). */
+  --hand-reserve: clamp(32px, 5vh, 42px);
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none;}
+/* Прогрессивное улучшение: там, где браузер понимает dvh (реальная
+   видимая высота с учётом появляющейся/скрывающейся адресной
+   строки телефона), используем её — меньше "прыжков" интерфейса,
+   из-за которых страница ощущается как листаемый сайт, а не как
+   стабильное приложение. */
+@supports (height: 100dvh){
+  html,body{height:100dvh;}
+}
 body{
   background:radial-gradient(ellipse at 15% 0%, #16281d 0%, transparent 55%),
              radial-gradient(ellipse at 85% 100%, #14251b 0%, transparent 55%), var(--bg);
-  color:var(--bone); font-family:'Inter',sans-serif; min-height:100vh;
+  color:var(--bone); font-family:'Inter',sans-serif;
   touch-action:manipulation;
+  display:flex; flex-direction:column; /* весь сайт — один экран-приложение, без прокрутки страницы */
 }
 .mono{font-family:'IBM Plex Mono',monospace;}
 button{font-family:'Inter',sans-serif;}

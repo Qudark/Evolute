@@ -2,28 +2,28 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ЭВОЛЮЦИЯ — онлайн</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ЭВОЛЮЦИЯ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <!-- Стили разбиты по экранам/блокам — порядок важен только
      для 01-tokens.css (переменные) и 12-animations.css (общие
      keyframes), которые нужны остальным файлам. -->
-<link rel="stylesheet" href="css/01-tokens.css">
-<link rel="stylesheet" href="css/02-layout.css">
-<link rel="stylesheet" href="css/03-home.css">
-<link rel="stylesheet" href="css/04-lobby.css">
-<link rel="stylesheet" href="css/05-catalog.css">
-<link rel="stylesheet" href="css/06-phasebar.css">
-<link rel="stylesheet" href="css/07-game-table.css">
-<link rel="stylesheet" href="css/08-player-area.css">
-<link rel="stylesheet" href="css/09-deck-discard.css">
-<link rel="stylesheet" href="css/10-cards.css">
-<link rel="stylesheet" href="css/11-misc.css">
-<link rel="stylesheet" href="css/12-animations.css">
-<link rel="stylesheet" href="css/13-hand.css">
-<link rel="stylesheet" href="css/14-facepopup.css">
+<link rel="stylesheet" href="css/01-tokens.css?v=20260904b">
+<link rel="stylesheet" href="css/02-layout.css?v=20260904b">
+<link rel="stylesheet" href="css/03-home.css?v=20260904b">
+<link rel="stylesheet" href="css/04-lobby.css?v=20260904b">
+<link rel="stylesheet" href="css/05-catalog.css?v=20260904b">
+<link rel="stylesheet" href="css/06-phasebar.css?v=20260904b">
+<link rel="stylesheet" href="css/07-game-table.css?v=20260904b">
+<link rel="stylesheet" href="css/08-player-area.css?v=20260904b">
+<link rel="stylesheet" href="css/09-deck-discard.css?v=20260904b">
+<link rel="stylesheet" href="css/10-cards.css?v=20260904b">
+<link rel="stylesheet" href="css/11-misc.css?v=20260904b">
+<link rel="stylesheet" href="css/12-animations.css?v=20260904b">
+<link rel="stylesheet" href="css/13-hand.css?v=20260904b">
+<link rel="stylesheet" href="css/14-facepopup.css?v=20260904b">
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -32,52 +32,15 @@
 </head>
 <body>
 
-<header class="top">
-  <div class="wordmark" id="homeLink">
-    <h1>Эволюция</h1>
-    <span class="tag">онлайн-прототип</span>
-  </div>
-  <div class="top-right">
-    <div class="room-badge" id="roomBadge" style="display:none;">
-      <span class="mono code" id="roomBadgeCode"></span>
-      <span class="you" id="roomBadgeYou"></span>
-    </div>
-    <nav class="tabs">
-      <button data-view="home" class="active">Меню</button>
-      <button data-view="catalog">Каталог карт</button>
-      <button data-view="game" id="navGame" disabled>Стол</button>
-    </nav>
-
-    <!-- Меню "три точки" — теперь всегда в верхнем правом углу
-         экрана, а не в сайдбаре у стола (видно только в комнате). -->
-    <div class="controls-block">
-      <button class="btn-dots" id="menuDots" title="Меню" style="display:none;">⋮</button>
-      <div class="controls-popup" id="controlsPopup">
-        <button class="ctrl-btn" data-view="home">🏠 Меню</button>
-        <button class="ctrl-btn" data-view="catalog">📚 Каталог</button>
-        <div class="ctrl-sep"></div>
-        <div class="foodbank">
-          <span>Корм</span>
-          <button id="foodMinus">−</button>
-          <span id="foodCount">0</span>
-          <button id="foodPlus">+</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
-
-<main>
-
-  <div class="notice-banner" id="storageNotice"></div>
+<!-- Без хедера и футера сайта: приложение — это просто область
+     с текущим экраном (.app-content) и панель вкладок снизу. -->
+<main class="app-content">
 
   <!-- ===================== HOME ===================== -->
   <div class="view active" id="view-home">
-    <div class="hero">
-      <h2>Соберите вид, выживите на столе</h2>
-      <p>Создайте игру и отправьте код друзьям — они подключатся со своих телефонов, каждому раздадут по 6 карт, и вы вместе построите свою экосистему.</p>
-    </div>
+    <div class="notice-banner" id="storageNotice"></div>
 
+    <h2 class="home-title">Новая игра</h2>
     <div class="home-grid">
       <div class="home-card">
         <h3>Создать игру</h3>
@@ -100,10 +63,6 @@
         <button class="btn secondary" id="btnJoin">Войти в комнату</button>
         <div class="errmsg" id="joinErr"></div>
       </div>
-    </div>
-
-    <div class="noticebox">
-      Стол не проверяет игровые правила — карты можно свободно перетаскивать из руки на стол (как новый вид) или на существующий вид (как свойство). Своя рука видна только вам в интерфейсе, но техническая приватность не гарантирована — используйте код только с людьми, которым доверяете.
     </div>
   </div>
 
@@ -140,6 +99,28 @@
 
     <div id="boardBlock" style="display:none;">
 
+      <!-- Верхняя строка игрового экрана: код комнаты, статус
+           синхронизации, меню "⋮" (кормовая база). Это не хедер
+           сайта — часть самого экрана стола, видна только тут. -->
+      <div class="ingame-topbar">
+        <div class="room-chip" id="roomBadge" style="display:none;">
+          <span class="mono code" id="roomBadgeCode"></span>
+          <span class="you" id="roomBadgeYou"></span>
+        </div>
+        <span class="sync-tag" id="lobbySync2"></span>
+        <div class="controls-block">
+          <button class="btn-dots" id="menuDots" title="Меню">⋮</button>
+          <div class="controls-popup" id="controlsPopup">
+            <div class="foodbank">
+              <span>Корм</span>
+              <button id="foodMinus">−</button>
+              <span id="foodCount">0</span>
+              <button id="foodPlus">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Фазы хода -->
       <div class="phasebar">
         <div class="phase-track" id="phaseTrack"></div>
@@ -147,9 +128,7 @@
       </div>
 
       <!-- Игровой стол: строго сверху вниз — соперники, пустая
-           зона стола (колода / сброс), затем сам игрок. Все три
-           зоны растут и сжимаются пропорционально друг другу
-           (см. .game-table в css/07-game-table.css). -->
+           зона стола (колода / сброс), затем сам игрок. -->
       <div class="game-table">
 
         <!-- Зона 1 — соперники -->
@@ -183,14 +162,18 @@
         </div>
 
       </div>
-
-      <div class="sync-strip">
-        <span class="sync-tag" id="lobbySync2"></span>
-      </div>
     </div>
   </div>
 
 </main>
+
+<!-- Нижняя панель вкладок — единственная постоянная навигация
+     во всём приложении (замена шапке-сайту сверху). -->
+<nav class="tabs bottom-tabs">
+  <button data-view="home" class="active"><span class="tab-icon">🏠</span>Меню</button>
+  <button data-view="catalog"><span class="tab-icon">📚</span>Каталог</button>
+  <button data-view="game" id="navGame" disabled><span class="tab-icon">🎲</span>Стол</button>
+</nav>
 
 <!-- Попап выбора стороны двусторонней карты (напр. «Паразит / Хищник»),
      показывается в момент розыгрыша карты как свойства. -->
@@ -198,6 +181,6 @@
   <div class="face-popup-box"></div>
 </div>
 
-<script type="module" src="js/main.js"></script>
+<script type="module" src="js/main.js?v=20260904b"></script>
 </body>
 </html>

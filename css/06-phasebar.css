@@ -1,7 +1,7 @@
 /* ============================================================
    06 · PHASE BAR — индикатор фаз хода над столом.
    ============================================================ */
-.phasebar{padding:10px 0 6px;border-bottom:1px solid var(--line);margin-bottom:10px;}
+.phasebar{flex:0 0 auto;padding:10px 0 6px;border-bottom:1px solid var(--line);margin-bottom:10px;}
 .phase-track{display:flex;gap:6px;flex-wrap:wrap;}
 .phase-pill{flex:1 1 120px;display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);cursor:pointer;transition:.15s;}
 .phase-pill:hover{border-color:#48664f;}

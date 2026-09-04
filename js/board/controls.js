@@ -1,10 +1,10 @@
 /* ============================================================
    board/controls.js — разовая настройка интерактива стола:
-   стрелки/свайп соперников, всплывающее меню, переключение
-   вкладок из меню (через общий nav.js), кормовая база и
-   разметка зоны сброса как drop-цели.
+   стрелки/свайп соперников, всплывающее меню (кормовая база) и
+   разметка зоны сброса как drop-цели. Переключение вкладок
+   (Меню/Каталог/Стол) теперь только через нижнюю панель —
+   дублирующих кнопок в этом попапе больше нет.
    ============================================================ */
-import { setView } from '../nav.js';
 import { getRoom } from './state.js';
 import { getSession } from '../session.js';
 import { renderGame } from './render.js';
@@ -42,10 +42,6 @@ export function setupControls(){
   });
   document.addEventListener('click', () => {
     document.getElementById('controlsPopup').classList.remove('open');
-  });
-
-  document.querySelectorAll('.ctrl-btn[data-view]').forEach(btn => {
-    btn.addEventListener('click', () => setView(btn.dataset.view));
   });
 
   // Единственное место, где навешиваются обработчики кормовой

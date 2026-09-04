@@ -25,6 +25,16 @@ import { shouldAnimate } from './appear-tracker.js';
 const PLAY_THRESHOLD_Y = -55; // сколько нужно потянуть вверх, чтобы начался перенос карты
 const MIN_STEP_RATIO = 0.30;  // минимальный шаг между картами (доля ширины карты) — теснее некуда
 const MAX_STEP_RATIO = 0.94;  // максимальный шаг — почти не перекрываются, когда карт мало
+const REST_HIDE_RATIO = 0.5;  // в покое карта наполовину спрятана за нижней границей зоны руки
+
+// Запас сверху под всплывающее имя карты — та же величина, что
+// зона руки резервирует в CSS (--hand-reserve, 13-hand.css).
+// Читаем из CSS, а не дублируем число, чтобы вёрстка и разметка
+// карт всегда были синхронизированы.
+function getReservePx(){
+  const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hand-reserve'));
+  return Number.isFinite(v) ? v : 34;
+}
 
 function buildCardEl(card){
   const type = getType(card.typeId);
@@ -44,29 +54,34 @@ function buildCardEl(card){
   return el;
 }
 
-function positionCard(card, x, lifted){
+// restY/liftedY — вертикальное положение карты в покое (наполовину
+// утоплена под низ зоны) и при выборе (поднята целиком, в зону
+// запаса под имя). Считаются один раз в renderHand() от реального
+// размера карты и передаются сюда, а не пересчитываются на каждый
+// вызов.
+function positionCard(card, x, y, lifted){
   card.dataset.baseX = x;
-  card.style.transform = 'translateX(' + x + 'px)' + (lifted ? ' translateY(-18px) scale(1.06)' : '');
+  card.style.transform = 'translate(' + x + 'px, ' + y + 'px)' + (lifted ? ' scale(1.06)' : '');
 }
 
-function setSelected(cards, selIdx){
+function setSelected(cards, selIdx, restY, liftedY){
   cards.forEach((c, i) => {
     const isSel = i === selIdx;
     c.classList.toggle('selected', isSel);
     c.style.zIndex = isSel ? 999 : i;
-    positionCard(c, Number(c.dataset.baseX), isSel);
+    positionCard(c, Number(c.dataset.baseX), isSel ? liftedY : restY, isSel);
   });
 }
 
-function deselectAll(cards){
+function deselectAll(cards, restY){
   cards.forEach((c, i) => {
     c.classList.remove('selected');
     c.style.zIndex = i;
-    positionCard(c, Number(c.dataset.baseX), false);
+    positionCard(c, Number(c.dataset.baseX), restY, false);
   });
 }
 
-function attachGesture(card, idx, allCards, handleDropCb){
+function attachGesture(card, idx, allCards, handleDropCb, restY, liftedY){
   card.addEventListener('pointerdown', (e) => {
     if (e.button === 2) return;
     e.preventDefault();
@@ -82,7 +97,7 @@ function attachGesture(card, idx, allCards, handleDropCb){
     const rects = allCards.map(c => c.getBoundingClientRect());
 
     Drag.setActive(true); // блокируем перерисовку стола на время всего жеста
-    setSelected(allCards, selIdx);
+    setSelected(allCards, selIdx, restY, liftedY);
 
     function nearestIndex(clientX){
       let best = 0, bestDist = Infinity;
@@ -111,7 +126,7 @@ function attachGesture(card, idx, allCards, handleDropCb){
           const ni = nearestIndex(ev.clientX);
           if (ni !== selIdx){
             selIdx = ni;
-            setSelected(allCards, selIdx);
+            setSelected(allCards, selIdx, restY, liftedY);
           }
         }
       }
@@ -139,7 +154,7 @@ function attachGesture(card, idx, allCards, handleDropCb){
         liftedCard.style.visibility = '';
       }
 
-      deselectAll(allCards);
+      deselectAll(allCards, restY);
       Drag.setActive(false);
     }
 
@@ -167,6 +182,7 @@ export function renderHand(hand, handleDropCb){
 
   const containerWidth = strip.clientWidth;
   const cardW = cards[0].offsetWidth;
+  const cardH = cards[0].offsetHeight;
   const minStep = cardW * MIN_STEP_RATIO;
   const maxStep = cardW * MAX_STEP_RATIO;
   const step = cards.length > 1
@@ -175,9 +191,17 @@ export function renderHand(hand, handleDropCb){
   const totalWidth = cardW + step * (cards.length - 1);
   const startX = Math.max(0, (containerWidth - totalWidth) / 2);
 
+  // В покое карта сдвинута вниз настолько, что её нижняя половина
+  // уходит за overflow:hidden зоны руки (см. 13-hand.css) — как
+  // будто спрятана за нижней границей зоны. При выборе (liftedY)
+  // карта поднимается до самого верха зоны и становится видна целиком.
+  const reservePx = getReservePx();
+  const liftedY = reservePx;
+  const restY = reservePx + cardH * REST_HIDE_RATIO;
+
   cards.forEach((card, i) => {
     const x = startX + i * step;
-    positionCard(card, x, false);
+    positionCard(card, x, restY, false);
     card.style.zIndex = i;
 
     // Анимация появления — только для карт, которых мы ещё не видели
@@ -187,6 +211,6 @@ export function renderHand(hand, handleDropCb){
       card.style.setProperty('--enter-delay', (i * 0.04) + 's');
     }
 
-    attachGesture(card, i, cards, handleDropCb);
+    attachGesture(card, i, cards, handleDropCb, restY, liftedY);
   });
 }

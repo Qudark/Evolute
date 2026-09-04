@@ -6,10 +6,18 @@
    (board/hand-view.js) от их количества — здесь только
    фиксированный размер самой карты и внешний вид элементов.
    ============================================================ */
+/* Высота зоны = запас под всплывающее имя (--hand-reserve) + сама
+   карта (--hand-card-h). overflow:hidden — это и есть "нижняя
+   граница зоны руки": карты в состоянии покоя стоят ниже верхнего
+   края этой зоны настолько, что ровно половина карты уходит за
+   счёт этой границы (см. board/hand-view.js, REST_HIDE_RATIO).
+   Когда карту зажимают, она поднимается вверх, до самого верха
+   зоны — тогда видна целиком, вместе с именем в запасной зоне. */
 .hand-strip {
   position: relative;
-  flex: 0 0 150px;
-  height: 150px;
+  flex: 0 0 auto;
+  height: calc(var(--hand-reserve) + var(--hand-card-h));
+  overflow: hidden;
   touch-action: none;
   user-select: none;
 }
@@ -18,8 +26,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 92px;
-  height: 128px;
+  width: var(--hand-card-w);
+  height: var(--hand-card-h);
   border-radius: 12px;
   background: var(--paper);
   color: var(--ink);
@@ -108,9 +116,7 @@
 }
 
 @media (max-width: 900px) {
-  .hand-strip { flex-basis: 118px; height: 118px; }
-
-  .hand-card { width: 76px; height: 106px; border-radius: 10px; }
+  .hand-card { border-radius: 10px; }
   .hc-icon-corner { font-size: 13px; top: 5px; left: 5px; }
   .hc-face2 { font-size: 7px; top: 21px; }
   .hc-icon-main { font-size: 24px; bottom: 8px; }

@@ -12,7 +12,7 @@
   background: rgba(13, 23, 18, 0.45);
   border: 1px solid transparent;
   transition: border-color 0.2s, background 0.2s, transform 0.2s;
-  min-width: 105px;
+  min-width: calc(var(--card-w) + 16px);
   animation: cardAppear 0.4s ease both;
 }
 
@@ -31,7 +31,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 3px;
-  max-width: 115px;
+  max-width: calc(var(--card-w) + 30px);
 }
 
 .tag {
@@ -57,10 +57,15 @@
   letter-spacing: 0.5px;
 }
 
-/* ===== MINICARD ===== */
+/* ===== MINICARD =====
+   Ширина/высота — резиновые переменные из 01-tokens.css: карта
+   сама подстраивается под доступное место по обеим осям, поэтому
+   отдельный набор фиксированных px "для телефона" больше не нужен
+   (см. также @media ниже — там остались только некрупные правки
+   отступов/шрифта, не размер самой карты). */
 .minicard {
-  width: 86px;
-  height: 118px;
+  width: var(--card-w);
+  height: var(--card-h);
   border-radius: 10px;
   position: relative;
   cursor: grab;
@@ -118,13 +123,7 @@
 
 @media (max-width: 900px) {
   .species {
-    min-width: 92px;
     padding: 6px 8px;
-  }
-
-  .minicard {
-    width: 74px;
-    height: 100px;
   }
 
   .minicard .mi-icon { font-size: 20px; }

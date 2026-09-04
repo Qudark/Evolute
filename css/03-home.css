@@ -1,15 +1,14 @@
 /* ============================================================
-   03 · HOME — экран "Меню": заголовок, карточки создания и
-   входа в комнату, поля форм и универсальные классы .btn.
+   03 · HOME — экран "Меню": карточки создания/входа в комнату,
+   поля форм и универсальные классы .btn. Без маркетингового
+   хиро-блока — сразу к делу, как в приложении, а не на сайте.
    ============================================================ */
-.hero{padding:40px 0 20px;text-align:center;}
-.hero h2{font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:clamp(24px,5vw,34px);margin:0 0 8px;}
-.hero p{color:#93a89a;font-size:14px;max-width:520px;margin:0 auto;}
-.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px;}
+.home-title{font-family:'Fraunces',serif;font-weight:600;font-size:18px;margin:4px 0 14px;color:var(--bone);}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media(max-width:640px){.home-grid{grid-template-columns:1fr;}}
-.home-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:12px;}
-.home-card h3{font-family:'Fraunces',serif;font-size:18px;margin:0;}
-.home-card p{font-size:12.5px;color:#93a89a;line-height:1.5;margin:0;}
+.home-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:11px;}
+.home-card h3{font-family:'Fraunces',serif;font-size:17px;margin:0;}
+.home-card p{font-size:12px;color:#93a89a;line-height:1.5;margin:0;}
 .field{display:flex;flex-direction:column;gap:6px;}
 .field label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#7d9787;}
 .field input, .field select{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;color:var(--bone);padding:10px 12px;font-size:14px;font-family:'Inter',sans-serif;}
@@ -21,4 +20,3 @@
 .btn.small{padding:7px 13px;font-size:12px;}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
 .errmsg{color:#e08a6a;font-size:12px;font-family:'IBM Plex Mono',monospace;min-height:16px;}
-.noticebox{background:var(--c-defense-soft);border:1px solid var(--c-defense);border-radius:10px;padding:12px 14px;font-size:12px;color:#c7d6cb;line-height:1.5;margin-top:26px;}
