@@ -27,13 +27,17 @@ const MIN_STEP_RATIO = 0.30;  // минимальный шаг между кар
 const MAX_STEP_RATIO = 0.94;  // максимальный шаг — почти не перекрываются, когда карт мало
 const REST_HIDE_RATIO = 0.5;  // в покое карта наполовину спрятана за нижней границей зоны руки
 
-// Запас сверху под всплывающее имя карты — та же величина, что
-// зона руки резервирует в CSS (--hand-reserve, 13-hand.css).
-// Читаем из CSS, а не дублируем число, чтобы вёрстка и разметка
-// карт всегда были синхронизированы.
-function getReservePx(){
-  const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hand-reserve'));
-  return Number.isFinite(v) ? v : 34;
+// Запас сверху под всплывающее имя карты. CSS задаёт высоту
+// .hand-strip как calc(--hand-reserve + --hand-card-h) — но
+// getComputedStyle() для CSS-переменной отдаёт её "как написано"
+// (строку вида "clamp(32px, 5vh, 42px)"), а не готовое число в px,
+// поэтому parseFloat() по ней всегда возвращал бы NaN. Вместо
+// парсинга строки просто меряем реальный отрендеренный элемент:
+// resolvedReserve = высота .hand-strip − высота карты — это и есть
+// фактический запас, всегда в точности синхронный с версткой.
+function getReservePx(strip, cardH){
+  const v = strip.clientHeight - cardH;
+  return v > 0 ? v : 34;
 }
 
 function buildCardEl(card){
@@ -195,7 +199,7 @@ export function renderHand(hand, handleDropCb){
   // уходит за overflow:hidden зоны руки (см. 13-hand.css) — как
   // будто спрятана за нижней границей зоны. При выборе (liftedY)
   // карта поднимается до самого верха зоны и становится видна целиком.
-  const reservePx = getReservePx();
+  const reservePx = getReservePx(strip, cardH);
   const liftedY = reservePx;
   const restY = reservePx + cardH * REST_HIDE_RATIO;
 

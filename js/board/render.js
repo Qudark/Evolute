@@ -25,7 +25,15 @@ export function render(){
     renderLobby(room);
   } else {
     document.getElementById('lobbyBlock').style.display = 'none';
-    document.getElementById('boardBlock').style.display = 'block';
+    // ВАЖНО: именно 'flex', а не 'block' — #boardBlock объявлен в
+    // 07-game-table.css как flex-колонка (display:flex;flex:1),
+    // чтобы .game-table внутри него растягивалась на весь остаток
+    // экрана. Инлайн-style всегда перебивает внешний CSS для того
+    // же свойства, поэтому 'block' здесь сводил flex-схему на нет:
+    // .game-table переставала быть flex-элементом и сжималась по
+    // высоте своего контента, а не тянулась во весь экран — именно
+    // это и выглядело как "игровая зона скомкалась".
+    document.getElementById('boardBlock').style.display = 'flex';
     renderGame(room);
   }
 }
