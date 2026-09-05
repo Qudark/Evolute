@@ -1,20 +1,19 @@
 /* ============================================================
-   08 · PLAYER ZONE — зона 3 стола: сверху — виды игрока (пропор-
-   циональная, гибкая, со своим min-height + overflow), снизу —
-   рука-гармошка ФИКСИРОВАННОЙ высоты (flex: 0 0 auto, задаётся в
-   13-hand.css) — она не участвует в общем сжатии, поэтому карты
-   в руке никогда не "теряются" за пределами зоны при нехватке
-   места (раньше рука тоже тянулась пропорционально — в этом и
-   была причина обрезанного интерфейса).
+   08 · PLAYER ZONE — .player-zone больше не участвует в flex-
+   раскладке сама (display:contents) — её дети (.player-table и
+   .hand-strip) становятся прямыми flex-элементами .game-table,
+   наравне с .opponent-strip. Это специально, чтобы у
+   .opponent-table и .player-table была ОДИНАКОВАЯ доля места
+   (flex: 1 1 0 у обоих) — тогда их общая граница со столом
+   (нижняя у соперника, верхняя у игрока) стыкуется ровно
+   посередине вокруг неподвижной .mid-zone, а не там, где
+   получится. Рука (.hand-strip) — по-прежнему ФИКСИРОВАННОЙ
+   высоты (flex: 0 0 auto, задаётся в 13-hand.css) и в этой
+   пропорции не участвует — иначе карты в руке снова могли бы
+   "теряться" при нехватке места.
    ============================================================ */
 .player-zone {
-  flex: 1.4 1 0;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 0 12px 8px;
-  z-index: 1;
-  gap: 6px;
+  display: contents;
 }
 
 .player-table {
@@ -22,14 +21,22 @@
   min-height: calc(var(--card-h) + 16px);
   display: flex;
   gap: 16px;
-  justify-content: center;
+  justify-content: safe center;
   align-items: flex-end;
-  padding: 10px 10px 6px;
+  padding: 10px 16px 6px;
+  margin: 0 12px;
   border-radius: 12px;
   overflow-x: auto;
-  overflow-y: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-x;
+  cursor: grab;
   transition: background 0.2s;
+  z-index: 1;
 }
+.player-table::-webkit-scrollbar { display: none; }
+.player-table.dragging { cursor: grabbing; scroll-behavior: auto; }
 
 .table-hint {
   font-family: 'IBM Plex Mono', monospace;
@@ -41,13 +48,10 @@
 }
 
 @media (max-width: 900px) {
-  .player-zone {
-    padding: 0 8px 6px;
-  }
-
   .player-table {
     align-items: flex-end;
     padding-bottom: 4px;
+    margin: 0 8px;
     gap: 10px;
   }
 

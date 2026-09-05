@@ -21,9 +21,11 @@
   position: relative;
   flex: 0 0 auto;
   height: calc(var(--hand-reserve) + var(--hand-card-h) * 0.5);
+  margin: 6px 12px 8px;
   overflow: visible;
   touch-action: none;
   user-select: none;
+  z-index: 1;
 }
 
 .hand-strip::after {
@@ -132,6 +134,7 @@
 }
 
 @media (max-width: 900px) {
+  .hand-strip { margin: 4px 8px 6px; }
   .hand-card { border-radius: 10px; }
   .hc-icon-corner { font-size: 13px; top: 5px; left: 5px; }
   .hc-face2 { font-size: 7px; top: 21px; }

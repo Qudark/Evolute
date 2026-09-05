@@ -119,7 +119,6 @@
   gap: 6px;
   min-width: 150px;
   flex-shrink: 0;
-  animation: cardAppear 0.5s ease both;
 }
 
 .opponent-name {
@@ -134,13 +133,21 @@
 .opponent-table {
   display: flex;
   gap: 12px;
-  justify-content: center;
+  justify-content: safe center;
   align-items: flex-start;
   min-height: calc(var(--card-h) + 24px);
   padding: 8px;
   border-radius: 12px;
   transition: background 0.2s;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-x;
+  cursor: grab;
 }
+.opponent-table::-webkit-scrollbar { display: none; }
+.opponent-table.dragging { cursor: grabbing; scroll-behavior: auto; }
 
 .empty-opponent {
   font-family: 'IBM Plex Mono', monospace;

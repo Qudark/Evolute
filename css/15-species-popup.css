@@ -1,0 +1,42 @@
+/* ============================================================
+   15 · SPECIES POPUP — маленький попап ПРЯМО НАД конкретным видом
+   на столе (не на весь экран, в отличие от .face-popup) — долгое
+   нажатие на своей карточке → кнопка "в сброс" рядом с ней.
+   Координаты (top/left) выставляет JS (board/species-popup.js) —
+   здесь только сам вид попапа и то, что он position:fixed.
+   ============================================================ */
+.species-popup {
+  position: fixed;
+  display: none;
+  z-index: 300;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+}
+.species-popup.open {
+  display: block;
+  animation: popupIn 0.15s ease both;
+}
+
+.species-popup-btn {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--bone);
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.species-popup-btn:hover {
+  border-color: #c25b4a;
+  background: rgba(194, 91, 74, 0.15);
+  color: #e08b7a;
+}

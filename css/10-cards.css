@@ -13,7 +13,13 @@
   border: 1px solid transparent;
   transition: border-color 0.2s, background 0.2s, transform 0.2s;
   min-width: calc(var(--card-w) + 16px);
-  animation: cardAppear 0.4s ease both;
+  /* Анимация появления НЕ здесь — раньше это правило запускало
+     "плюх" для КАЖДОЙ пересозданной .species при любом ре-рендере
+     (взяли карту, сходил другой игрок и т.д.), сводя на нет проверку
+     "уже видели этот вид" в JS (species-view.js/appear-tracker.js —
+     она добавляет анимацию только НОВым видам через inline
+     style.animation). Базового CSS-правила достаточно было, чтобы
+     анимация играла всегда, независимо от той проверки. */
 }
 
 .species:hover {
@@ -21,33 +27,6 @@
   background: rgba(13, 23, 18, 0.65);
   transform: translateY(-2px);
 }
-
-.player-species .taglist { margin-bottom: 3px; }
-.opponent-species .taglist { margin-top: 3px; }
-
-/* Tags */
-.taglist {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 3px;
-  max-width: calc(var(--card-w) + 30px);
-}
-
-.tag {
-  font-size: 9px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 2px 7px;
-  color: #c7d6cb;
-  font-family: 'IBM Plex Mono', monospace;
-  white-space: nowrap;
-  transition: transform 0.15s, background 0.15s;
-  cursor: default;
-}
-
-.tag:hover { transform: scale(1.06); background: #2a4530; }
 
 .lbl {
   font-family: 'IBM Plex Mono', monospace;
@@ -83,6 +62,8 @@
   flex: none;
   touch-action: none;
   user-select: none;
+  /* Анимация появления убрана отсюда по той же причине, что и у
+     .species выше — она "перебивала" JS-проверку появления. */
 }
 
 .minicard:hover {
@@ -102,6 +83,65 @@
 .minicard.facedown .mi-name { font-style: italic; color: var(--ink-soft); font-weight: 500; }
 
 .minicard.locked { cursor: default; opacity: 0.95; }
+
+/* ===== Теги свойств — ПРЯМО на карточке =====
+   Раньше список свойств рисовался отдельным рядом над/под картой
+   (.taglist) — он занимал своё, дополнительное место в .species,
+   из-за чего вид с несколькими свойствами получался заметно выше
+   самой карты. Теперь это плашка-оверлей внутри самой .minicard,
+   поверх нижней части картинки — карта не растягивается вообще,
+   сколько бы свойств на ней ни было (сверх высоты плашки лишнее
+   просто уходит под overflow:hidden). Если название свойства не
+   помещается по ширине — вместо обрезания текста включается
+   бегущая строка (см. .marquee ниже и card-view.js, который решает,
+   кому она нужна, реально измерив текст). */
+.mi-tags {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1px;
+  max-height: 62%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mi-tag {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(15, 26, 18, 0.78);
+  border-radius: 5px;
+  padding: 1.5px 4px;
+  line-height: 1.2;
+}
+
+.mi-tag-icon { font-size: 8px; flex: none; }
+
+.mi-tag-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 6.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #d9e6dc;
+  white-space: nowrap;
+  mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+}
+
+.mi-tag-name-inner { display: inline-block; }
+
+.mi-tag-name.marquee .mi-tag-name-inner {
+  animation: tagMarquee var(--marquee-duration, 4s) linear infinite;
+  mask-image: none;
+}
+
+@keyframes tagMarquee {
+  0%, 12% { transform: translateX(0); }
+  88%, 100% { transform: translateX(calc(-1 * var(--marquee-distance, 40px))); }
+}
 
 /* Dropzone */
 .dropzone-active {
@@ -129,6 +169,6 @@
   .minicard .mi-icon { font-size: 20px; }
   .minicard .mi-name { font-size: 9px; }
 
-  .tag { font-size: 8px; padding: 1px 5px; }
+  .mi-tag-name { font-size: 6px; }
   .lbl { font-size: 8px; }
 }
