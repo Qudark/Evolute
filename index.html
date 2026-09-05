@@ -10,21 +10,21 @@
 <!-- Стили разбиты по экранам/блокам — порядок важен только
      для 01-tokens.css (переменные) и 12-animations.css (общие
      keyframes), которые нужны остальным файлам. -->
-<link rel="stylesheet" href="css/01-tokens.css?v=20260904f">
-<link rel="stylesheet" href="css/02-layout.css?v=20260904f">
-<link rel="stylesheet" href="css/03-home.css?v=20260904f">
-<link rel="stylesheet" href="css/04-lobby.css?v=20260904f">
-<link rel="stylesheet" href="css/05-catalog.css?v=20260904f">
-<link rel="stylesheet" href="css/06-phasebar.css?v=20260904f">
-<link rel="stylesheet" href="css/07-game-table.css?v=20260904f">
-<link rel="stylesheet" href="css/08-player-area.css?v=20260904f">
-<link rel="stylesheet" href="css/09-deck-discard.css?v=20260904f">
-<link rel="stylesheet" href="css/10-cards.css?v=20260904f">
-<link rel="stylesheet" href="css/11-misc.css?v=20260904f">
-<link rel="stylesheet" href="css/12-animations.css?v=20260904f">
-<link rel="stylesheet" href="css/13-hand.css?v=20260904f">
-<link rel="stylesheet" href="css/14-facepopup.css?v=20260904f">
-<link rel="stylesheet" href="css/15-species-popup.css?v=20260904f">
+<link rel="stylesheet" href="css/01-tokens.css?v=20260904g">
+<link rel="stylesheet" href="css/02-layout.css?v=20260904g">
+<link rel="stylesheet" href="css/03-home.css?v=20260904g">
+<link rel="stylesheet" href="css/04-lobby.css?v=20260904g">
+<link rel="stylesheet" href="css/05-catalog.css?v=20260904g">
+<link rel="stylesheet" href="css/06-phasebar.css?v=20260904g">
+<link rel="stylesheet" href="css/07-game-table.css?v=20260904g">
+<link rel="stylesheet" href="css/08-player-area.css?v=20260904g">
+<link rel="stylesheet" href="css/09-deck-discard.css?v=20260904g">
+<link rel="stylesheet" href="css/10-cards.css?v=20260904g">
+<link rel="stylesheet" href="css/11-misc.css?v=20260904g">
+<link rel="stylesheet" href="css/12-animations.css?v=20260904g">
+<link rel="stylesheet" href="css/13-hand.css?v=20260904g">
+<link rel="stylesheet" href="css/14-facepopup.css?v=20260904g">
+<link rel="stylesheet" href="css/15-species-popup.css?v=20260904g">
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -131,8 +131,13 @@
            зона стола (колода / сброс), затем сам игрок. -->
       <div class="game-table">
 
-        <!-- Зона 1 — соперники -->
+        <!-- Зона 1 — соперники. Имя текущего соперника в режиме
+             карусели (телефон) — ОТДЕЛЬНЫЙ фиксированный элемент,
+             а не часть уезжающего слайда: всегда сверху по центру,
+             меняется быстрым fade (см. opponents-view.js). Кнопки
+             ‹ › — тоже вне слайда, зафиксированы по бокам зоны. -->
         <div class="opponent-strip" id="opponentStrip">
+          <div class="opponent-name-fixed" id="opponentNameFixed"></div>
           <div class="opponent-carousel" id="opponentCarousel"></div>
           <button class="carousel-arrow left" id="oppArrowLeft" aria-label="Предыдущий">‹</button>
           <button class="carousel-arrow right" id="oppArrowRight" aria-label="Следующий">›</button>
@@ -195,6 +200,6 @@
      выше — просто position:fixed, координаты выставляет JS. -->
 <div class="species-popup" id="speciesPopup"></div>
 
-<script type="module" src="js/main.js?v=20260904f"></script>
+<script type="module" src="js/main.js?v=20260904g"></script>
 </body>
 </html>

@@ -26,16 +26,6 @@ export function setupControls(){
     if (Opponents.arrowRight(currentOpponents().length)) renderGame();
   });
 
-  const strip = document.getElementById('opponentStrip');
-  let touchStartX = 0;
-  strip.addEventListener('touchstart', e => {
-    touchStartX = e.touches[0].clientX;
-  }, { passive: true });
-  strip.addEventListener('touchend', e => {
-    const diff = touchStartX - e.changedTouches[0].clientX;
-    if (Opponents.swipe(diff, currentOpponents().length)) renderGame();
-  }, { passive: true });
-
   document.getElementById('menuDots').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('controlsPopup').classList.toggle('open');

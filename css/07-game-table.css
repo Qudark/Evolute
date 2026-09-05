@@ -112,6 +112,31 @@
   flex-shrink: 0;
 }
 
+/* В режиме карусели имя есть уже отдельно, зафиксировано сверху
+   (.opponent-name-fixed) — прежнее имя внутри слайда прячем, чтобы
+   не показывалось дважды. Вне карусели (широкий экран, все
+   соперники в ряд) — наоборот: своё имя нужно у каждого. */
+.opponent-carousel.carousel-mode .opponent-name { display: none; }
+
+.opponent-name-fixed {
+  display: none;
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--bone);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.opponent-name-fixed.visible { display: block; }
+.opponent-name-fixed.fade { animation: oppNameFade 0.18s ease both; }
+
+@keyframes oppNameFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 .opponent-slot {
   display: flex;
   flex-direction: column;
@@ -230,7 +255,7 @@
     min-height: 46px;
   }
 
-  .opponent-name {
+  .opponent-name, .opponent-name-fixed {
     font-size: 12px;
   }
 
