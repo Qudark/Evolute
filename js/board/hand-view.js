@@ -25,18 +25,18 @@ import { shouldAnimate } from './appear-tracker.js';
 const PLAY_THRESHOLD_Y = -55; // сколько нужно потянуть вверх, чтобы начался перенос карты
 const MIN_STEP_RATIO = 0.30;  // минимальный шаг между картами (доля ширины карты) — теснее некуда
 const MAX_STEP_RATIO = 0.94;  // максимальный шаг — почти не перекрываются, когда карт мало
-const REST_HIDE_RATIO = 0.5;  // в покое карта наполовину спрятана за нижней границей зоны руки
+const REST_HIDE_RATIO = 0.5;  // в покое видна только половина карты — вторая спрятана плашкой ::after (13-hand.css)
 
 // Запас сверху под всплывающее имя карты. CSS задаёт высоту
-// .hand-strip как calc(--hand-reserve + --hand-card-h) — но
+// .hand-strip как calc(--hand-reserve + --hand-card-h*0.5) — но
 // getComputedStyle() для CSS-переменной отдаёт её "как написано"
 // (строку вида "clamp(32px, 5vh, 42px)"), а не готовое число в px,
 // поэтому parseFloat() по ней всегда возвращал бы NaN. Вместо
 // парсинга строки просто меряем реальный отрендеренный элемент:
-// resolvedReserve = высота .hand-strip − высота карты — это и есть
-// фактический запас, всегда в точности синхронный с версткой.
+// resolvedReserve = высота .hand-strip − половина высоты карты —
+// это и есть фактический запас, всегда синхронный с версткой.
 function getReservePx(strip, cardH){
-  const v = strip.clientHeight - cardH;
+  const v = strip.clientHeight - cardH * REST_HIDE_RATIO;
   return v > 0 ? v : 34;
 }
 
@@ -195,13 +195,14 @@ export function renderHand(hand, handleDropCb){
   const totalWidth = cardW + step * (cards.length - 1);
   const startX = Math.max(0, (containerWidth - totalWidth) / 2);
 
-  // В покое карта сдвинута вниз настолько, что её нижняя половина
-  // уходит за overflow:hidden зоны руки (см. 13-hand.css) — как
-  // будто спрятана за нижней границей зоны. При выборе (liftedY)
-  // карта поднимается до самого верха зоны и становится видна целиком.
+  // В покое верх карты стоит ровно на границе зоны (reservePx) — тогда
+  // ровно её нижняя половина уходит за пределы .hand-strip и скрыта
+  // плашкой ::after (13-hand.css). При выборе карта поднимается к
+  // самому верху (y=0) — целиком видна и рисуется поверх плашки
+  // (z-index 999 у .selected > z-index 500 у плашки).
   const reservePx = getReservePx(strip, cardH);
-  const liftedY = reservePx;
-  const restY = reservePx + cardH * REST_HIDE_RATIO;
+  const liftedY = 0;
+  const restY = reservePx;
 
   cards.forEach((card, i) => {
     const x = startX + i * step;

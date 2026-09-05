@@ -6,6 +6,7 @@
    ============================================================ */
 import { createSpeciesCard } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
+import { fitCardsToZone } from './fit-cards.js';
 
 const SWIPE_THRESHOLD = 40;
 
@@ -13,6 +14,7 @@ let currentOppIdx = 0;
 
 export function renderOpponents(opponents){
   const carousel = document.getElementById('opponentCarousel');
+  const strip = document.getElementById('opponentStrip');
   carousel.innerHTML = '';
 
   if (opponents.length === 0){
@@ -45,6 +47,11 @@ export function renderOpponents(opponents){
   });
 
   updateCarousel(opponents.length);
+  // Паддинг .opponent-strip (12px сверху + 6px снизу, см. 07-game-table.css)
+  // плюс высота имени соперника (.opponent-name) — то, что clientHeight
+  // включает, но что не относится к самой карточке вида.
+  const nameH = strip.querySelector('.opponent-name')?.offsetHeight || 0;
+  fitCardsToZone(strip, 18 + nameH);
 }
 
 export function updateCarousel(total){
