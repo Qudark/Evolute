@@ -132,15 +132,24 @@
       <div class="game-table">
 
         <!-- Зона 1 — соперники. Имя текущего соперника в режиме
-             карусели (телефон) — ОТДЕЛЬНЫЙ фиксированный элемент,
-             а не часть уезжающего слайда: всегда сверху по центру,
-             меняется быстрым fade (см. opponents-view.js). Кнопки
-             ‹ › — тоже вне слайда, зафиксированы по бокам зоны. -->
+             карусели (телефон) и кнопки ‹ › лежат ВНЕ скроллящейся
+             части (.opponent-scroll) — прямыми детьми самой
+             .opponent-strip, у которой больше НЕТ overflow-y на
+             себе. Раньше они были детьми того же элемента, что и
+             сам скролл (overflow-y:auto прямо на .opponent-strip),
+             из-за чего физически прокручивались вместе с
+             содержимым и "уезжали" — position:absolute не спасал,
+             это не то же самое, что position:fixed. Теперь скролл
+             (если он вообще нужен по высоте) происходит только
+             внутри .opponent-scroll, а имя/стрелки в принципе не
+             участвуют в этом скролле, потому что они не его дети. -->
         <div class="opponent-strip" id="opponentStrip">
           <div class="opponent-name-fixed" id="opponentNameFixed"></div>
-          <div class="opponent-carousel" id="opponentCarousel"></div>
           <button class="carousel-arrow left" id="oppArrowLeft" aria-label="Предыдущий">‹</button>
           <button class="carousel-arrow right" id="oppArrowRight" aria-label="Следующий">›</button>
+          <div class="opponent-scroll" id="opponentScroll">
+            <div class="opponent-carousel" id="opponentCarousel"></div>
+          </div>
         </div>
 
         <!-- Зона 2 — пустой стол: сброс слева, колода справа -->

@@ -5,20 +5,26 @@
    имя вынесено в ОТДЕЛЬНЫЙ фиксированный элемент над каруселью
    (#opponentNameFixed) — оно не едет вместе со слайдом, а просто
    быстро перекрашивается fade'ом при переключении (см.
-   updateCarousel). Стрелки — тоже вне слайда, зафиксированы по
-   бокам всей зоны (CSS: position:absolute на .opponent-strip).
+   updateCarousel). Стрелки — тоже вне слайда. И имя, и стрелки —
+   прямые дети НЕскроллящейся .opponent-strip (см. 07-game-table.css:
+   скролл живёт только на вложенной .opponent-scroll), поэтому они
+   физически не могут уехать при прокрутке содержимого.
+   Переключение соперника на телефоне — только этими кнопками:
+   свайп по столу соперника (opponent-swipe.js) больше НЕ пытается
+   заодно переключать стол, он только скроллит ряд существ — так
+   у двух жестов нет общей зоны конфликта.
    currentOppIdx хранится здесь же — это чисто локальное состояние
    отображения, не часть комнаты.
    ============================================================ */
 import { createSpeciesCard } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
 import { fitCardsToZone } from './fit-cards.js';
-import { enableOpponentEdgeSwipe } from './opponent-swipe.js';
+import { enableOpponentTableScroll } from './opponent-swipe.js';
 
 let currentOppIdx = 0;
 let lastOpponents = [];
 
-export function renderOpponents(opponents, rerender){
+export function renderOpponents(opponents){
   lastOpponents = opponents;
   const carousel = document.getElementById('opponentCarousel');
   const strip = document.getElementById('opponentStrip');
@@ -46,16 +52,10 @@ export function renderOpponents(opponents, rerender){
     tableRow.className = 'opponent-table';
     markDropzone(tableRow, { zoneType: 'newspecies', zonePlayer: p.id });
 
-    // Свайп по ряду вида этого соперника: сначала листает ЕГО СОБСТВЕННЫХ
-    // существ по горизонтали, и только когда упёрлись в край ряда —
-    // ещё один свайп в ту же сторону переключает на другого соперника
-    // (см. opponent-swipe.js). Это и есть развязка с конфликтом,
-    // из-за которого свайп между соперниками ломался.
-    enableOpponentEdgeSwipe(tableRow, (dir) => {
-      const total = opponents.length;
-      const changed = dir > 0 ? arrowRight(total) : arrowLeft();
-      if (changed && rerender) rerender();
-    });
+    // Свайп по ряду существ этого соперника — только скроллит сам
+    // ряд, никогда не переключает соперника (см. opponent-swipe.js).
+    // Переключение — исключительно кнопками ‹ › ниже (controls.js).
+    enableOpponentTableScroll(tableRow);
 
     const table = p.table || [];
     table.forEach((sp, sIdx) => {

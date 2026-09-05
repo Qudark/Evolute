@@ -52,7 +52,7 @@ export function renderGame(){
 
   const session = getSession();
   const opponents = room.players.filter(p => p.id !== session.playerId);
-  renderOpponents(opponents, renderGame);
+  renderOpponents(opponents);
 
   renderPlayerTable(me);
   renderDeck(handleDrop);

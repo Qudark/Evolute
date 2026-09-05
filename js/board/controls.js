@@ -58,7 +58,7 @@ export function setupControls(){
     resizeTimer = setTimeout(() => {
       const room = getRoom();
       if (!room || room.status === 'lobby') return;
-      Opponents.renderOpponents(currentOpponents(), renderGame);
+      Opponents.renderOpponents(currentOpponents());
     }, 150);
   });
 }

@@ -1,28 +1,31 @@
 /* ============================================================
-   board/opponent-swipe.js — свайп по ряду существ ОДНОГО
-   соперника, увязанный с переключением МЕЖДУ соперниками:
-     - пока в ряду есть куда скроллить в сторону, куда тянет
-       палец, — просто скроллим ряд (листаем его существ);
-     - как только упёрлись в край ряда, СЛЕДУЮЩАЯ порция того же
-       по направлению движения (после порога) переключает на
-       соседнего соперника — как в галереях, где сначала долистываешь
-       фото до края, и только потом свайп переключает альбом.
-   Раньше это было ДВА независимых обработчика на разных уровнях
-   (свайп между соперниками — на #opponentStrip, скролл ряда — на
-   .opponent-table), которые конфликтовали за один и тот же жест.
-   Теперь это один жест на .opponent-table, вызывающий колбэк
-   onEdgeSwipe(dir) только когда реально уперлись в край.
-   ============================================================ */
-const DRAG_THRESHOLD = 6;     // px, после которого жест точно считается протяжкой
-const OVERSCROLL_THRESHOLD = 46; // px "перетяжки" за край ряда, чтобы это засчиталось как переключение
+   board/opponent-swipe.js — протяжка (мышью/пальцем) для
+   горизонтального скролла ряда существ ОДНОГО соперника.
 
-export function enableOpponentEdgeSwipe(el, onEdgeSwipe){
+   Раньше здесь была другая, более хитрая идея: во время протяжки
+   считался "оверскролл" за край ряда, и после порога это должно
+   было переключать на другого соперника — сделать один жест сразу
+   и скроллом ряда, и переключателем столов. На практике это
+   ломалось: нативный тач-скролл браузера (нужен из-за touch-action,
+   иначе скролл дёрганый) выполнялся ПАРАЛЛЕЛЬНО с нашим ручным
+   overscroll-подсчётом и физически раскачивал родителя
+   (.opponent-strip, у которого было overflow-y:auto) — из-за этого
+   "фиксированные" стрелки/имя (лежавшие в том же скролле) уезжали,
+   а сам порог переключения срабатывал неровно.
+
+   Теперь развязка проще и надёжнее: этот жест ВСЕГДА только
+   скроллит ряд — и ничего больше. Переключение между соперниками —
+   отдельными кнопками ‹ › (см. controls.js, они не трогают
+   .opponent-table и никогда не задействуют этот же жест, поэтому
+   конфликтовать физически нечему).
+   ============================================================ */
+const DRAG_THRESHOLD = 6; // px, после которого жест считается протяжкой
+
+export function enableOpponentTableScroll(el){
   let pointerId = null;
   let startX = 0;
   let startScrollLeft = 0;
   let dragging = false;
-  let overscroll = 0;
-  let fired = false;
 
   el.addEventListener('pointerdown', (e) => {
     if (e.button !== undefined && e.button !== 0) return;
@@ -30,8 +33,6 @@ export function enableOpponentEdgeSwipe(el, onEdgeSwipe){
     startX = e.clientX;
     startScrollLeft = el.scrollLeft;
     dragging = false;
-    overscroll = 0;
-    fired = false;
   });
 
   el.addEventListener('pointermove', (e) => {
@@ -45,26 +46,8 @@ export function enableOpponentEdgeSwipe(el, onEdgeSwipe){
     }
     if (!dragging) return;
 
-    const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
-    let target = startScrollLeft - dx;
-
-    if (target < 0){
-      overscroll = -target;
-      target = 0;
-    } else if (target > maxScroll){
-      overscroll = target - maxScroll;
-      target = maxScroll;
-    } else {
-      overscroll = 0;
-    }
-    el.scrollLeft = target;
+    el.scrollLeft = startScrollLeft - dx;
     e.preventDefault();
-
-    if (!fired && overscroll > OVERSCROLL_THRESHOLD){
-      fired = true;
-      // Тянем влево (dx < 0, "хотим следующее") — переключаем вперёд.
-      onEdgeSwipe(dx < 0 ? 1 : -1);
-    }
   });
 
   function end(e){
@@ -75,7 +58,6 @@ export function enableOpponentEdgeSwipe(el, onEdgeSwipe){
     el.classList.remove('dragging');
     dragging = false;
     pointerId = null;
-    overscroll = 0;
   }
 
   el.addEventListener('pointerup', end);

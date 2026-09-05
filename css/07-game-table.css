@@ -83,14 +83,33 @@
 .ingame-topbar .room-chip .you { color:#93a89a; }
 .ingame-topbar .sync-tag { font-size: 10.5px; color:#7d9787; }
 
-/* ===== ЗОНА 1 · ОППОНЕНТЫ (пропорциональная, со скроллом) ===== */
+/* ===== ЗОНА 1 · ОППОНЕНТЫ (пропорциональная, со скроллом) =====
+   ВАЖНО: скролл по вертикали (если стол соперника не влезает по
+   высоте) живёт ТОЛЬКО на .opponent-scroll — самой .opponent-strip
+   скролл не нужен и специально не задан. Раньше overflow-y:auto
+   стоял прямо на .opponent-strip, а фиксированные имя/стрелки были
+   обычными детьми этого же элемента — то есть физически являлись
+   частью того же скроллящегося содержимого и укатывались вместе
+   с ним при прокрутке (position:absolute фиксирует позицию
+   относительно контейнера, но НЕ выключает элемент из скролла
+   этого контейнера — это может только position:fixed или вынос
+   за пределы самого скроллящегося блока, что и сделано здесь). */
 .opponent-strip {
   position: relative;
   padding: 12px 16px 6px;
   z-index: 1;
   flex: 1 1 0;
   min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.opponent-scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .opponent-carousel {
