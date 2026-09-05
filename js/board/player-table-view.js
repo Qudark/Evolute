@@ -5,11 +5,13 @@
 import { createSpeciesCard } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
 import { fitCardsToZone } from './fit-cards.js';
+import { enableTableGestures } from './table-gestures.js';
 
 export function renderPlayerTable(me){
   const container = document.getElementById('playerTable');
   container.innerHTML = '';
   markDropzone(container, { zoneType: 'newspecies', zonePlayer: me.id });
+  enableTableGestures(container);
 
   const table = me.table || [];
   table.forEach((sp, idx) => {

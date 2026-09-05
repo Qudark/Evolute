@@ -84,6 +84,24 @@ function dropAsDiscard(payload){
   });
 }
 
+/* Сбросить целый вид со стола (карту-вид + все прикреплённые к
+   нему карты-свойства) — используется попапом по долгому нажатию
+   на карточке (см. species-popup.js / table-gestures.js). Ищем вид
+   по uid его карты, а не по индексу в массиве — индекс мог устареть
+   между долгим нажатием и нажатием кнопки в попапе (например, кто-то
+   успел сбросить другой вид раньше в этом же столе). */
+export function discardSpecies(playerId, speciesUid){
+  mutate(r => {
+    const target = r.players.find(p => p.id === playerId);
+    if (!target || !target.table) return;
+    const idx = target.table.findIndex(sp => sp.card.uid === speciesUid);
+    if (idx < 0) return;
+    const [sp] = target.table.splice(idx, 1);
+    if (!target.discard) target.discard = [];
+    target.discard.push(sp.card, ...(sp.props || []));
+  });
+}
+
 export function foodAdjust(delta){
   mutate(r => { r.foodCount = Math.max(0, (r.foodCount || 0) + delta); });
 }
