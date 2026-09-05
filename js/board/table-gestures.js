@@ -42,12 +42,23 @@ export function enableTableGestures(container){
 
     clearLongPress();
     if (pressedCard && pressedCard.classList.contains('player-species')){
+      const uid = pressedCard.dataset.speciesUid;
+      const playerId = pressedCard.dataset.zonePlayer;
       longPressTimer = setTimeout(() => {
         longPressTimer = null;
-        showSpeciesPopup(pressedCard, {
-          playerId: pressedCard.dataset.zonePlayer,
-          speciesUid: pressedCard.dataset.speciesUid
-        });
+        // За время удержания стол мог перерисоваться (ход другого
+        // игрока и т.п.) — тогда исходный узел уже отсоединён от
+        // документа, и getBoundingClientRect() у него вернёт нули
+        // (попап улетал бы в левый верхний угол). Поэтому берём
+        // ЖИВОЙ узел с тем же uid вида на момент показа, а не тот,
+        // что был зажат в начале жеста.
+        let liveCard = pressedCard.isConnected ? pressedCard : null;
+        if (!liveCard){
+          liveCard = container.querySelector('.species[data-species-uid="' + CSS.escape(uid) + '"]');
+        }
+        if (liveCard){
+          showSpeciesPopup(liveCard, { playerId, speciesUid: uid });
+        }
         pressedCard = null; // попап уже показан — отпускание не должно ничего доделывать
       }, LONG_PRESS_MS);
     }

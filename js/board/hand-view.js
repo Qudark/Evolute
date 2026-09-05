@@ -65,7 +65,12 @@ function buildCardEl(card){
 // вызов.
 function positionCard(card, x, y, lifted){
   card.dataset.baseX = x;
-  card.style.transform = 'translate(' + x + 'px, ' + y + 'px)' + (lifted ? ' scale(1.06)' : '');
+  // Ставим через CSS-переменные (--hc-x/--hc-y/--hc-scale), а не
+  // напрямую card.style.transform — иначе конфликтует с CSS-
+  // анимацией появления, см. 13-hand.css/.hand-card.enter.
+  card.style.setProperty('--hc-x', x + 'px');
+  card.style.setProperty('--hc-y', y + 'px');
+  card.style.setProperty('--hc-scale', lifted ? '1.06' : '1');
 }
 
 function setSelected(cards, selIdx, restY, liftedY){

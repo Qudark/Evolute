@@ -28,14 +28,6 @@
   transform: translateY(-2px);
 }
 
-.lbl {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 8.5px;
-  color: #7d9787;
-  margin-top: 1px;
-  letter-spacing: 0.5px;
-}
-
 /* ===== MINICARD =====
    Ширина/высота — резиновые переменные из 01-tokens.css: карта
    сама подстраивается под доступное место по обеим осям, поэтому
@@ -103,7 +95,7 @@
   display: flex;
   flex-direction: column-reverse;
   gap: 1px;
-  max-height: 62%;
+  max-height: 92%;
   overflow: hidden;
   pointer-events: none;
 }
@@ -170,5 +162,4 @@
   .minicard .mi-name { font-size: 9px; }
 
   .mi-tag-name { font-size: 6px; }
-  .lbl { font-size: 8px; }
 }

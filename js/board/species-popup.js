@@ -30,6 +30,12 @@ export function showSpeciesPopup(cardEl, { playerId, speciesUid }){
   // чтобы offsetWidth/Height у попапа были настоящими, а не 0 —
   // иначе анкоринг "прямо над карточкой" будет мимо.
   const cardRect = cardEl.getBoundingClientRect();
+  if (!cardRect.width && !cardRect.height){
+    // Карточка отсоединена от документа или ещё не размещена —
+    // показывать попап в (0,0) хуже, чем не показать его вовсе.
+    popup.classList.remove('open');
+    return;
+  }
   const pw = popup.offsetWidth;
   const ph = popup.offsetHeight;
 

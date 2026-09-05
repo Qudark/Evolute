@@ -23,12 +23,7 @@ export function createSpeciesCard(sp, idx, playerId, owner){
     wrap.style.animation = 'cardAppear 0.4s ease ' + (idx * 0.06) + 's both';
   }
 
-  const label = document.createElement('div');
-  label.className = 'lbl';
-  label.textContent = 'вид №' + (idx + 1);
-
   wrap.appendChild(cardEl(props));
-  wrap.appendChild(label);
 
   return wrap;
 }

@@ -7,7 +7,6 @@
 import { createSpeciesCard } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
 import { fitCardsToZone } from './fit-cards.js';
-import { enableTableGestures } from './table-gestures.js';
 
 const SWIPE_THRESHOLD = 40;
 
@@ -37,7 +36,6 @@ export function renderOpponents(opponents){
     const tableRow = document.createElement('div');
     tableRow.className = 'opponent-table';
     markDropzone(tableRow, { zoneType: 'newspecies', zonePlayer: p.id });
-    enableTableGestures(tableRow);
 
     const table = p.table || [];
     table.forEach((sp, sIdx) => {

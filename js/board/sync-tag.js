@@ -10,8 +10,6 @@ export function renderSyncTag(room){
               : mode === 'claude'   ? 'синхронизация: тест в чате (опрос)'
               : 'офлайн-режим: только это устройство';
   const text = label + ' · обновлено ' + new Date(room.updatedAt || Date.now()).toLocaleTimeString();
-  ['lobbySync', 'lobbySync2'].forEach(id => {
-    const tag = document.getElementById(id);
-    if (tag) tag.textContent = text;
-  });
+  const tag = document.getElementById('lobbySync');
+  if (tag) tag.textContent = text;
 }
