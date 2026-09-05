@@ -44,4 +44,21 @@ export function setupControls(){
   // некуда было физически перетащить, хотя обработчик уже был).
   const discardPile = document.getElementById('discardPile');
   if (discardPile) markDropzone(discardPile, { zoneType: 'discard' });
+
+  // Режим карусели соперников (стрелки+фиксированное имя вместо
+  // рядного показа) выбирается по window.innerWidth и раньше
+  // пересчитывался только при обычной перерисовке стола (ход,
+  // обновление руки и т.п.). Если сменить размер окна/повернуть
+  // телефон БЕЗ игрового события — стрелки и имя оставались в
+  // прежнем режиме до следующего рендера. Пересчитываем отдельно,
+  // с дебаунсом, чтобы не дёргать перерисовку на каждый пиксель.
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const room = getRoom();
+      if (!room || room.status === 'lobby') return;
+      Opponents.renderOpponents(currentOpponents(), renderGame);
+    }, 150);
+  });
 }
