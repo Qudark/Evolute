@@ -10,16 +10,25 @@
    скролл живёт только на вложенной .opponent-scroll), поэтому они
    физически не могут уехать при прокрутке содержимого.
    Переключение соперника на телефоне — только этими кнопками:
-   свайп по столу соперника (opponent-swipe.js) больше НЕ пытается
-   заодно переключать стол, он только скроллит ряд существ — так
-   у двух жестов нет общей зоны конфликта.
+   свайп по столу соперника (creature-pager.js) листает страницы
+   ЕГО существ, а не переключает соперника — так у двух жестов нет
+   общей зоны конфликта.
    currentOppIdx хранится здесь же — это чисто локальное состояние
    отображения, не часть комнаты.
+
+   Существа ВНУТРИ стола одного соперника (если их больше, чем
+   влезает в ряд без скролла) больше не листаются непрерывным
+   драг-скроллом — это резалось асинхронной подстановкой веб-шрифта
+   (см. controls.js) и визуально "уезжало" в сторону. Теперь это
+   постраничный показ с fade-переходом (creature-pager.js): сколько
+   карт реально влезает, столько на странице и показывается, и эта
+   страница всегда просто центрируется — рассинхронизироваться
+   там нечему.
    ============================================================ */
 import { createSpeciesCard } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
 import { fitCardsToZone, alignScrollableRow } from './fit-cards.js';
-import { enableOpponentTableScroll } from './opponent-swipe.js';
+import { renderPage } from './creature-pager.js';
 
 let currentOppIdx = 0;
 let lastOpponents = [];
@@ -39,6 +48,7 @@ export function renderOpponents(opponents){
   }
 
   const tableRows = [];
+  const tablesData = []; // { tableRow, species, playerId } — для второго, финального прохода ниже
 
   opponents.forEach((p, idx) => {
     const slot = document.createElement('div');
@@ -54,19 +64,18 @@ export function renderOpponents(opponents){
     tableRow.className = 'opponent-table';
     markDropzone(tableRow, { zoneType: 'newspecies', zonePlayer: p.id });
 
-    // Свайп по ряду существ этого соперника — только скроллит сам
-    // ряд, никогда не переключает соперника (см. opponent-swipe.js).
-    // Переключение — исключительно кнопками ‹ › ниже (controls.js).
-    enableOpponentTableScroll(tableRow);
-
     const table = p.table || [];
-    table.forEach((sp, sIdx) => {
-      tableRow.appendChild(createSpeciesCard(sp, sIdx, p.id, 'opponent'));
-    });
+    // Черновой прогон: нужны хоть какие-то реальные .minicard в
+    // разметке, чтобы fitCardsToZone ниже честно измерил накладные
+    // расходы подписи/тегов. Итоговая нарезка на страницы (она
+    // зависит от финального размера карты) будет пересчитана вторым,
+    // финальным проходом сразу после fitCardsToZone.
+    renderPage(tableRow, table, p.id, (sp, sIdx) => createSpeciesCard(sp, sIdx, p.id, 'opponent'));
 
     slot.appendChild(tableRow);
     carousel.appendChild(slot);
     tableRows.push(tableRow);
+    tablesData.push({ tableRow, species: table, playerId: p.id });
   });
 
   updateCarousel(opponents.length, true);
@@ -83,10 +92,18 @@ export function renderOpponents(opponents){
   const nameH = visibleName?.offsetHeight || 0;
   fitCardsToZone(strip, 18 + nameH);
 
-  // Только теперь, когда размер карточек уже окончательный, можно
-  // честно узнать, влезает ли ряд каждого соперника целиком — от
-  // этого зависит, центрировать его или прижимать к левому краю
-  // (см. комментарий в fit-cards.js).
+  // Финальный проход: --card-w/h на strip только что стали
+  // окончательными — по ним, а не по черновой прикидке из первого
+  // прохода выше, и нужно резать существ на страницы.
+  tablesData.forEach(({ tableRow, species, playerId }) => {
+    renderPage(tableRow, species, playerId, (sp, sIdx) => createSpeciesCard(sp, sIdx, playerId, 'opponent'));
+  });
+
+  // Подстраховка на случай, если даже одна карточка страницы вдруг
+  // не влезла (очень длинное имя вида, экстремальный зум и т.п.) —
+  // тогда честнее прижать её к краю, чем показать обрезанной по
+  // центру. В обычном режиме это правило никогда не сработает,
+  // раз страница по построению уже подобрана впритык.
   tableRows.forEach(alignScrollableRow);
 }
 
