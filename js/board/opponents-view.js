@@ -18,7 +18,7 @@
    ============================================================ */
 import { createSpeciesCard } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
-import { fitCardsToZone } from './fit-cards.js';
+import { fitCardsToZone, alignScrollableRow } from './fit-cards.js';
 import { enableOpponentTableScroll } from './opponent-swipe.js';
 
 let currentOppIdx = 0;
@@ -37,6 +37,8 @@ export function renderOpponents(opponents){
     updateCarousel(0, false);
     return;
   }
+
+  const tableRows = [];
 
   opponents.forEach((p, idx) => {
     const slot = document.createElement('div');
@@ -64,6 +66,7 @@ export function renderOpponents(opponents){
 
     slot.appendChild(tableRow);
     carousel.appendChild(slot);
+    tableRows.push(tableRow);
   });
 
   updateCarousel(opponents.length, true);
@@ -79,6 +82,12 @@ export function renderOpponents(opponents){
     : strip.querySelector('.opponent-name');
   const nameH = visibleName?.offsetHeight || 0;
   fitCardsToZone(strip, 18 + nameH);
+
+  // Только теперь, когда размер карточек уже окончательный, можно
+  // честно узнать, влезает ли ряд каждого соперника целиком — от
+  // этого зависит, центрировать его или прижимать к левому краю
+  // (см. комментарий в fit-cards.js).
+  tableRows.forEach(alignScrollableRow);
 }
 
 export function updateCarousel(total, animateName){

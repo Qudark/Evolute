@@ -21,7 +21,7 @@
   min-height: calc(var(--card-h) + 16px);
   display: flex;
   gap: 16px;
-  justify-content: safe center;
+  justify-content: center;
   align-items: flex-end;
   padding: 10px 16px 6px;
   margin: 0 12px;
@@ -37,6 +37,11 @@
 }
 .player-table::-webkit-scrollbar { display: none; }
 .player-table.dragging { cursor: grabbing; scroll-behavior: auto; }
+
+/* См. тот же класс и объяснение у .opponent-table в 07-game-table.css:
+   когда ряд не влезает целиком, центрирование прячет первую
+   карточку и роняет последнюю за край — прижимаем к левому краю. */
+.player-table.row-overflow { justify-content: flex-start; }
 
 .table-hint {
   font-family: 'IBM Plex Mono', monospace;

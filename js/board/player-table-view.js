@@ -4,7 +4,7 @@
    ============================================================ */
 import { createSpeciesCard } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
-import { fitCardsToZone } from './fit-cards.js';
+import { fitCardsToZone, alignScrollableRow } from './fit-cards.js';
 import { enableTableGestures } from './table-gestures.js';
 
 export function renderPlayerTable(me){
@@ -32,4 +32,5 @@ export function renderPlayerTable(me){
   // --card-h (calc(var(--card-h)+16px)) — без сброса мы бы мерили
   // старое (возможно завышенное) значение вместо честной доли места.
   fitCardsToZone(container, 16, true);
+  alignScrollableRow(container);
 }

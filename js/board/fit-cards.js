@@ -71,3 +71,28 @@ export function fitCardsToZone(zoneEl, extraReserve = 0, resetMinHeight = false)
   zoneEl.style.setProperty('--card-h', h + 'px');
   zoneEl.style.setProperty('--card-w', w + 'px');
 }
+
+/**
+ * Ряд с горизонтальным скроллом (.opponent-table / .player-table)
+ * по умолчанию центрирует карточки, пока они помещаются целиком —
+ * так выглядит аккуратнее, если карточек мало. Но стоило раньше
+ * положиться на CSS `justify-content: safe center` (он должен сам
+ * откатываться на выравнивание по краю, когда контент не влезает),
+ * и это оказалось ненадёжно: при переполнении ряд всё равно мог
+ * оказаться отцентрирован, из-за чего первая карточка пряталась
+ * слева непонятным отступом, а последняя вылезала за правый край
+ * экрана — визуально казалось, что ряд "сдвинут не туда".
+ * Проверяем сами через реальные размеры DOM и явно переключаем
+ * класс — либо контент помещается (центр), либо нет (по левому
+ * краю, и тогда именно скролл, а не центрирование, показывает
+ * остальное). Вызывать ПОСЛЕ того, как размер карточек уже
+ * подогнан (fitCardsToZone), иначе scrollWidth ещё не окончательный.
+ *
+ * @param {HTMLElement} rowEl — сам скроллящийся ряд (.opponent-table
+ *   или .player-table), НЕ его внешняя зона.
+ */
+export function alignScrollableRow(rowEl){
+  if (!rowEl) return;
+  const overflowing = rowEl.scrollWidth > rowEl.clientWidth + 1; // +1 — запас на субпиксельное округление
+  rowEl.classList.toggle('row-overflow', overflowing);
+}
