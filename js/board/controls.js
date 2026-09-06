@@ -61,4 +61,23 @@ export function setupControls(){
       Opponents.renderOpponents(currentOpponents());
     }, 150);
   });
+
+  // Шрифты (Fraunces/Inter/IBM Plex Mono) подключены с font-display:swap
+  // (см. index.html) — то есть сперва рисуются fallback-шрифтом, а
+  // настоящий шрифт подставляется чуть позже. От его метрик зависит
+  // ширина подписи вида, а значит и scrollWidth ряда — на нём завязаны
+  // fitCardsToZone/alignScrollableRow (js/board/fit-cards.js). Если стол
+  // отрисовался ДО подмены шрифта, размер карт и выравнивание (центр/край)
+  // посчитаны по временной геометрии; когда шрифт догружается, содержимое
+  // чуть меняется в размере, и ряд визуально уезжает в сторону, переставая
+  // совпадать с уже выставленным выравниванием. Пересчитываем всё один раз,
+  // когда шрифты точно готовы — аналогично тому, как это уже сделано выше
+  // для resize.
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(() => {
+      const room = getRoom();
+      if (!room || room.status === 'lobby') return;
+      renderGame();
+    });
+  }
 }
