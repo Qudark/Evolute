@@ -34,7 +34,7 @@ export const CARD_TYPES = [
       desc:'Хищник с этим свойством может атаковать виды со свойством «Камуфляж».' } ] },
 
   { id:'symbiosis', count:4, faces:[
-    { name:'Симбиоз', cat:'feeding', icon:'🐠',
+    { name:'Симбиоз', cat:'feeding', icon:'🐠', pair:true, symbiontChoice:true,
       desc:'Играется сразу на пару соседних видов: симбионт защищает соседа, а тот делится с ним пищей.' } ] },
 
   { id:'piracy', count:4, faces:[
@@ -58,7 +58,7 @@ export const CARD_TYPES = [
       desc:'Хищник, съевший этот вид, погибает в фазу вымирания.' } ] },
 
   { id:'interaction', count:4, faces:[
-    { name:'Взаимодействие', cat:'feeding', icon:'🔗',
+    { name:'Взаимодействие', cat:'feeding', icon:'🔗', pair:true,
       desc:'Играется на пару соседних видов: когда один берёт пищу из базы, второй получает ещё одну сверх очереди.' } ] },
 
   { id:'scavenger', count:4, faces:[
@@ -89,12 +89,12 @@ export const CARD_TYPES = [
     FACE_FAT ] },
 
   { id:'cooperation_predator', count:4, faces:[
-    { name:'Сотрудничество', cat:'feeding', icon:'🤝',
+    { name:'Сотрудничество', cat:'feeding', icon:'🤝', pair:true,
       desc:'Играется на пару соседних видов: когда один добывает пищу, второй сразу получает фишку вне очереди.' },
     FACE_PREDATOR ] },
 
   { id:'cooperation_fat', count:4, faces:[
-    { name:'Сотрудничество', cat:'feeding', icon:'🤝',
+    { name:'Сотрудничество', cat:'feeding', icon:'🤝', pair:true,
       desc:'Играется на пару соседних видов: когда один добывает пищу, второй сразу получает фишку вне очереди.' },
     FACE_FAT ] },
 

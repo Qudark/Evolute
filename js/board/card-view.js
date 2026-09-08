@@ -26,6 +26,19 @@ export function cardEl(props = []){
       const tag = document.createElement('div');
       tag.className = 'mi-tag';
 
+      // Парное свойство (Симбиоз/Взаимодействие/Сотрудничество,
+      // см. face.pair в data/cards.js) реально связано со вторым
+      // видом (pc.pairWith — uid его карты) — помечаем это визуально,
+      // чтобы было видно, что карта не просто лежит тут сама по себе.
+      // Для Симбиоза дополнительно дописываем роль этой стороны.
+      let displayName = face.name;
+      if (pc.pairWith){
+        tag.classList.add('mi-tag-pair');
+        if (pc.symbiont !== undefined){
+          displayName += pc.symbiont ? ' · симбионт' : ' · хозяин';
+        }
+      }
+
       const icon = document.createElement('span');
       icon.className = 'mi-tag-icon';
       icon.textContent = face.icon;
@@ -34,7 +47,7 @@ export function cardEl(props = []){
       name.className = 'mi-tag-name';
       const inner = document.createElement('span');
       inner.className = 'mi-tag-name-inner';
-      inner.textContent = face.name;
+      inner.textContent = displayName;
       name.appendChild(inner);
 
       tag.appendChild(icon);
@@ -44,7 +57,7 @@ export function cardEl(props = []){
       // Меряем реальную ширину ПОСЛЕ того, как элемент попадёт в
       // документ и получит раскладку (rAF ждёт следующий кадр) —
       // до этого offsetWidth/scrollWidth ничего не значат.
-      requestAnimationFrame(() => fitTagMarquee(name, inner, face.name));
+      requestAnimationFrame(() => fitTagMarquee(name, inner, displayName));
     });
 
     el.appendChild(tags);

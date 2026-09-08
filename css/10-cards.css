@@ -112,6 +112,34 @@
 
 .mi-tag-icon { font-size: 8px; flex: none; }
 
+/* Парное свойство (Симбиоз/Взаимодействие/Сотрудничество) — реально
+   привязано ко второму виду (pc.pairWith), а не просто лежит само по
+   себе, поэтому подсвечиваем его отдельным цветом рамки/фона. */
+.mi-tag-pair {
+  background: rgba(58, 92, 58, 0.55);
+  border: 1px solid rgba(150, 214, 150, 0.45);
+}
+
+/* Перетаскивание своего вида по столу (табл-жесты, см.
+   board/table-gestures.js): подсветка карточки, над которой сейчас
+   завис перетаскиваемый вид, слева/справа — покажет, куда он встанет. */
+.species.reorder-before,
+.species.reorder-after {
+  position: relative;
+}
+.species.reorder-before::before,
+.species.reorder-after::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--c-growth, #9fd89f);
+}
+.species.reorder-before::before { left: -6px; }
+.species.reorder-after::after { right: -6px; }
+
 .mi-tag-name {
   flex: 1 1 auto;
   min-width: 0;
