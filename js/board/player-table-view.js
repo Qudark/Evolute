@@ -2,7 +2,7 @@
    board/player-table-view.js — собственный ряд видов игрока,
    плюс подсказка, когда стол ещё пуст.
    ============================================================ */
-import { createSpeciesCard } from './species-view.js';
+import { buildSpeciesRow } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
 import { fitCardsToZone, alignScrollableRow } from './fit-cards.js';
 import { enableTableGestures } from './table-gestures.js';
@@ -14,9 +14,7 @@ export function renderPlayerTable(me){
   enableTableGestures(container);
 
   const table = me.table || [];
-  table.forEach((sp, idx) => {
-    container.appendChild(createSpeciesCard(sp, idx, me.id, 'player'));
-  });
+  container.appendChild(buildSpeciesRow(table, me.id, 'player'));
 
   if (table.length === 0){
     const hint = document.createElement('div');

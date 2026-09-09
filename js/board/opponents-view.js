@@ -16,7 +16,7 @@
    currentOppIdx хранится здесь же — это чисто локальное состояние
    отображения, не часть комнаты.
    ============================================================ */
-import { createSpeciesCard } from './species-view.js';
+import { buildSpeciesRow } from './species-view.js';
 import { markDropzone } from './dropzone-utils.js';
 import { fitCardsToZone, alignScrollableRow } from './fit-cards.js';
 import { enableOpponentTableScroll } from './opponent-swipe.js';
@@ -60,9 +60,7 @@ export function renderOpponents(opponents){
     enableOpponentTableScroll(tableRow);
 
     const table = p.table || [];
-    table.forEach((sp, sIdx) => {
-      tableRow.appendChild(createSpeciesCard(sp, sIdx, p.id, 'opponent'));
-    });
+    tableRow.appendChild(buildSpeciesRow(table, p.id, 'opponent'));
 
     slot.appendChild(tableRow);
     carousel.appendChild(slot);

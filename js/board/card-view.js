@@ -17,27 +17,21 @@ export function cardEl(props = []){
   el.className = 'minicard facedown locked';
   el.innerHTML = `<div class="mi-icon">🦎</div><div class="mi-name">вид</div>`;
 
-  if (props.length){
+  // Парные свойства (Симбиоз/Взаимодействие/Сотрудничество — у них
+  // pc.pairWith указывает на партнёра, см. drop-handlers.js) сюда
+  // не попадают: их рисует отдельный блок МЕЖДУ двумя карточками
+  // (board/species-view.js/buildConnector), а не тег на самой карте —
+  // иначе он налезал бы на обычные свойства этого же вида.
+  const soloProps = props.filter(pc => !pc.pairWith);
+
+  if (soloProps.length){
     const tags = document.createElement('div');
     tags.className = 'mi-tags';
 
-    props.forEach(pc => {
+    soloProps.forEach(pc => {
       const face = getFace(pc);
       const tag = document.createElement('div');
       tag.className = 'mi-tag';
-
-      // Парное свойство (Симбиоз/Взаимодействие/Сотрудничество,
-      // см. face.pair в data/cards.js) реально связано со вторым
-      // видом (pc.pairWith — uid его карты) — помечаем это визуально,
-      // чтобы было видно, что карта не просто лежит тут сама по себе.
-      // Для Симбиоза дополнительно дописываем роль этой стороны.
-      let displayName = face.name;
-      if (pc.pairWith){
-        tag.classList.add('mi-tag-pair');
-        if (pc.symbiont !== undefined){
-          displayName += pc.symbiont ? ' · симбионт' : ' · хозяин';
-        }
-      }
 
       const icon = document.createElement('span');
       icon.className = 'mi-tag-icon';
@@ -47,7 +41,7 @@ export function cardEl(props = []){
       name.className = 'mi-tag-name';
       const inner = document.createElement('span');
       inner.className = 'mi-tag-name-inner';
-      inner.textContent = displayName;
+      inner.textContent = face.name;
       name.appendChild(inner);
 
       tag.appendChild(icon);
@@ -57,7 +51,7 @@ export function cardEl(props = []){
       // Меряем реальную ширину ПОСЛЕ того, как элемент попадёт в
       // документ и получит раскладку (rAF ждёт следующий кадр) —
       // до этого offsetWidth/scrollWidth ничего не значат.
-      requestAnimationFrame(() => fitTagMarquee(name, inner, displayName));
+      requestAnimationFrame(() => fitTagMarquee(name, inner, face.name));
     });
 
     el.appendChild(tags);
