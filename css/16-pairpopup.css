@@ -1,7 +1,8 @@
 /* ============================================================
-   16 · PAIR POPUP — выбор второго вида и (для Симбиоза) стороны
-   симбионта при розыгрыше парной карты свойства (см.
-   board/pair-choice-popup.js). Внешне повторяет face-popup.
+   16 · PAIR POPUP — единственный оставшийся попап парных карт:
+   "кто симбионт?" (см. board/pair-choice-popup.js). Партнёра
+   выбирать больше не нужно — карту кладут прямо в щель между
+   двумя конкретными соседями. Внешне повторяет face-popup.
    ============================================================ */
 .pair-popup {
   position: fixed;
@@ -56,5 +57,13 @@
 }
 .pair-choice-btn:hover { border-color: var(--c-growth); background: var(--c-growth-soft); color: var(--c-growth); }
 
-.pc-icon { font-size: 18px; }
-.pc-name { font-weight: 600; }
+.pair-popup-arrows {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.pair-popup-arrows .pair-choice-btn {
+  font-size: 28px;
+  padding: 14px 22px;
+  justify-content: center;
+}

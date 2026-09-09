@@ -112,14 +112,6 @@
 
 .mi-tag-icon { font-size: 8px; flex: none; }
 
-/* Парное свойство (Симбиоз/Взаимодействие/Сотрудничество) — реально
-   привязано ко второму виду (pc.pairWith), а не просто лежит само по
-   себе, поэтому подсвечиваем его отдельным цветом рамки/фона. */
-.mi-tag-pair {
-  background: rgba(58, 92, 58, 0.55);
-  border: 1px solid rgba(150, 214, 150, 0.45);
-}
-
 /* Перетаскивание своего вида по столу (табл-жесты, см.
    board/table-gestures.js): подсветка карточки, над которой сейчас
    завис перетаскиваемый вид, слева/справа — покажет, куда он встанет. */
@@ -139,6 +131,47 @@
 }
 .species.reorder-before::before { left: -6px; }
 .species.reorder-after::after { right: -6px; }
+
+/* ===== Щель "между" двумя видами — зона для парных карт свойств
+   (Симбиоз/Взаимодействие/Сотрудничество, см. board/species-view.js/
+   buildConnector + board/pair-choice-popup.js). Пустая — почти
+   незаметная узкая полоска (расширяется при наведении перетаскиваемой
+   парной картой — .dropzone-active ниже уже подсвечивает сам факт,
+   тут только раздвигаем место, чтобы было куда целиться). Если между
+   этими двумя видами уже лежит парная карта — раскрывается в
+   подписанный блок со стрелочками, указывающими на "своего" из двух
+   соседей. ===== */
+.pair-gap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  align-self: center;
+  min-width: 6px;
+  border-radius: 8px;
+  transition: min-width 0.15s;
+}
+.pair-gap.dropzone-active { min-width: 46px; }
+.pair-gap.has-pair {
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0; /* дальше ширину определяет содержимое */
+}
+
+.pair-connector {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(58, 92, 58, 0.55);
+  border: 1px solid rgba(150, 214, 150, 0.45);
+  border-radius: 7px;
+  padding: 2px 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7px;
+  color: #d9e6dc;
+  white-space: nowrap;
+}
+.pair-connector .pc-arrow { font-size: 9px; line-height: 1; flex: none; }
 
 .mi-tag-name {
   flex: 1 1 auto;
@@ -190,4 +223,7 @@
   .minicard .mi-name { font-size: 9px; }
 
   .mi-tag-name { font-size: 6px; }
+
+  .pair-connector { font-size: 6px; padding: 1.5px 4px; }
+  .pair-gap.dropzone-active { min-width: 34px; }
 }
