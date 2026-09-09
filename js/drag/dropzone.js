@@ -23,5 +23,7 @@ export function zoneToPayload(zone){
     type: zone.dataset.zoneType,
     playerId: zone.dataset.zonePlayer,
     speciesIdx: zone.dataset.zoneSpecies,
+    leftUid: zone.dataset.zoneLeftUid,
+    rightUid: zone.dataset.zoneRightUid,
   };
 }
