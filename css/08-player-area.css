@@ -20,7 +20,7 @@
   flex: 1 1 0;
   min-height: calc(var(--card-h) + 16px);
   display: flex;
-  gap: 16px;
+  gap: 6px;
   justify-content: center;
   align-items: flex-end;
   padding: 10px 16px 6px;
@@ -57,7 +57,7 @@
     align-items: flex-end;
     padding-bottom: 4px;
     margin: 0 8px;
-    gap: 10px;
+    gap: 5px;
   }
 
   .table-hint {

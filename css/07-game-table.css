@@ -221,7 +221,7 @@
    Поэтому базовое правило — БЕЗ width, как раньше. */
 .opponent-table {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   justify-content: center;
   align-items: flex-start;
   min-height: calc(var(--card-h) + 24px);
