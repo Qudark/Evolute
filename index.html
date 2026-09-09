@@ -210,9 +210,11 @@
      выше — просто position:fixed, координаты выставляет JS. -->
 <div class="species-popup" id="speciesPopup"></div>
 
-<!-- Попап парных карт свойств (Симбиоз/Взаимодействие/Сотрудничество) —
-     выбор второго вида и, для Симбиоза, стороны-симбионта, см.
-     board/pair-choice-popup.js. Устроен как facePopup выше. -->
+<!-- Попап парной карты Симбиоза — выбор, какая из двух сторон
+     щели (см. board/species-view.js/buildGap) станет симбионтом.
+     Взаимодействие/Сотрудничество кладутся в щель вообще без
+     попапа. См. board/pair-choice-popup.js. Устроен как facePopup
+     выше. -->
 <div class="pair-popup" id="pairPopup">
   <div class="pair-popup-box"></div>
 </div>
