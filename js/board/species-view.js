@@ -35,23 +35,31 @@ export function createSpeciesCard(sp, idx, playerId, owner){
   return wrap;
 }
 
-/* Одна "плашка" парного свойства между двумя видами. pc — копия
-   карты со стороны ЛЕВОГО вида (см. buildGap ниже — она и вызывает
-   это ровно с той копией). Для Симбиоза (у копии есть pc.symbiont)
-   рисуем ОДНУ стрелку в сторону симбионта: pc.symbiont===true —
-   значит симбионт сам левый вид, стрелка налево, иначе направо.
-   У остальных парных карт (Взаимодействие/Сотрудничество) эффект
-   не привязан к стороне — стрелки в обе стороны сразу. */
+/* Один маленький значок парного свойства между двумя видами — без
+   подписи текстом, только эмодзи (чтобы не раздувать блок): иконка
+   грани карты + стрелка(и). pc — копия карты со стороны ЛЕВОГО вида
+   (см. buildGap ниже — она и вызывает это ровно с той копией).
+   Для Симбиоза (у копии есть pc.symbiont) стрелка ОДНА, и она не
+   только "смотрит" в сторону симбионта эмодзи-направлением, но и
+   физически стоит с ТОЙ ЖЕ стороны значка: симбионт слева —
+   стрелка слева от иконки, симбионт справа — стрелка справа. Если
+   бы стрелка всегда стояла по одну сторону и менялось только
+   направление эмодзи, при беглом взгляде это было бы легко перепутать.
+   У остальных парных карт (Взаимодействие/Сотрудничество) эффект не
+   привязан к стороне — стрелки сразу по обе стороны иконки. */
 function buildConnector(pc){
   const face = getFace(pc);
   const block = document.createElement('div');
   block.className = 'pair-connector';
 
   if (pc.symbiont !== undefined){
-    const arrow = pc.symbiont ? '⬅️' : '➡️';
-    block.innerHTML = `<span class="pc-arrow">${arrow}</span><span>${face.icon} ${face.name}</span>`;
+    if (pc.symbiont){
+      block.innerHTML = '<span class="pc-arrow">⬅️</span><span class="pc-icon">' + face.icon + '</span>';
+    } else {
+      block.innerHTML = '<span class="pc-icon">' + face.icon + '</span><span class="pc-arrow">➡️</span>';
+    }
   } else {
-    block.innerHTML = `<span class="pc-arrow">⬅️</span><span>${face.icon} ${face.name}</span><span class="pc-arrow">➡️</span>`;
+    block.innerHTML = '<span class="pc-arrow">⬅️</span><span class="pc-icon">' + face.icon + '</span><span class="pc-arrow">➡️</span>';
   }
 
   return block;

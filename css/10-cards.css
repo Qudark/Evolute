@@ -138,22 +138,27 @@
    полоска, расширяется при наведении перетаскиваемой парной картой
    (.dropzone-active ниже подсвечивает сам факт, тут только
    раздвигаем место, чтобы было куда целиться). Если между этими
-   двумя видами уже лежит парная карта — раскрывается в подписанный
-   блок со стрелочками, указывающими на "своего" из двух соседей.
-   ВАЖНО: align-self:stretch обязателен — без явной высоты пустая
-   щель имела нулевую высоту и была НЕПОПАДАЕМОЙ для
-   elementFromPoint() (drag/dropzone.js), из-за чего бросок карты
-   проваливался мимо неё на весь .player-table (зона "новый вид") и
-   вместо парного свойства создавался новый вид. Растягиваем щель на
-   всю высоту ряда, чтобы в неё гарантированно можно было попасть
-   пальцем/курсором в любой точке по вертикали. ===== */
+   двумя видами уже лежит парная карта — раскрывается в маленький
+   значок-эмодзи со стрелкой(ами), указывающими на "своего" из двух
+   соседей (без подписи текстом — чтобы не раздувать блок).
+   ВАЖНО: явная min-height обязательна — без неё пустая щель (пока
+   в ней ничего нет — а положить-то как раз и нужно) имела нулевую
+   высоту и была НЕПОПАДАЕМОЙ для elementFromPoint() (drag/dropzone.js),
+   из-за чего бросок карты проваливался мимо неё на весь .player-table
+   (зона "новый вид") и вместо парного свойства создавался новый вид.
+   Именно min-height, а НЕ align-self:stretch — stretch растягивал
+   щель по всей высоте РЯДА и (судя по всему) сбивал раскладку у
+   соперника; min-height даёт ту же гарантированную кликабельную
+   область, но щель остаётся обычным центрированным элементом, как
+   и было до неё. ===== */
 .pair-gap {
   display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  align-self: stretch;
+  align-self: center;
   min-width: 14px;
+  min-height: 40px;
   border-radius: 8px;
   transition: min-width 0.15s;
 }
@@ -161,24 +166,22 @@
 .pair-gap.has-pair {
   flex-direction: column;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   min-width: 0; /* дальше ширину определяет содержимое */
 }
 
 .pair-connector {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 1px;
   background: rgba(58, 92, 58, 0.55);
   border: 1px solid rgba(150, 214, 150, 0.45);
-  border-radius: 7px;
-  padding: 2px 5px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 7px;
-  color: #d9e6dc;
-  white-space: nowrap;
+  border-radius: 6px;
+  padding: 2px 3px;
+  line-height: 1;
 }
-.pair-connector .pc-arrow { font-size: 9px; line-height: 1; flex: none; }
+.pair-connector .pc-arrow,
+.pair-connector .pc-icon { font-size: 10px; line-height: 1; flex: none; }
 
 .mi-tag-name {
   flex: 1 1 auto;
@@ -231,6 +234,9 @@
 
   .mi-tag-name { font-size: 6px; }
 
-  .pair-connector { font-size: 6px; padding: 1.5px 4px; }
+  .pair-connector { padding: 1.5px 2px; }
+  .pair-connector .pc-arrow,
+  .pair-connector .pc-icon { font-size: 9px; }
+  .pair-gap { min-height: 34px; }
   .pair-gap.dropzone-active { min-width: 34px; }
 }
