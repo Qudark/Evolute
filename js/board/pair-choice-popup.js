@@ -9,7 +9,11 @@
    ============================================================ */
 
 /* onChoose('left' | 'right') — за какой из двух сторон щели остаётся
-   роль симбионта. */
+   роль симбионта. Если игрок тыкнет мимо кнопок (в затемнённый фон,
+   не поняв, что от него ждут выбора) — попап просто закрывается без
+   выбора; карта при этом остаётся в руке нетронутой (её ещё не
+   убрали — см. commitPairProperty в drop-handlers.js, он делает это
+   только ПОСЛЕ выбора), так что "зависшего" состояния не бывает. */
 export function chooseSymbiontSide(onChoose){
   const overlay = document.getElementById('pairPopup');
   const box = overlay.querySelector('.pair-popup-box');
@@ -27,11 +31,16 @@ export function chooseSymbiontSide(onChoose){
   function cleanup(){
     overlay.classList.remove('open');
     box.querySelectorAll('.pair-choice-btn').forEach(b => b.removeEventListener('click', onClick));
+    overlay.removeEventListener('click', onBackdropClick);
   }
   function onClick(e){
     const side = e.currentTarget.dataset.side;
     cleanup();
     onChoose(side);
   }
+  function onBackdropClick(e){
+    if (e.target === overlay) cleanup(); // клик мимо .pair-popup-box — отмена
+  }
   box.querySelectorAll('.pair-choice-btn').forEach(b => b.addEventListener('click', onClick));
+  overlay.addEventListener('click', onBackdropClick);
 }
