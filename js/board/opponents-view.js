@@ -94,6 +94,18 @@ export function updateCarousel(total, animateName){
   const right = document.getElementById('oppArrowRight');
   const nameFixed = document.getElementById('opponentNameFixed');
 
+  // Ширину стола (и, соответственно, возможность его внутреннего
+  // горизонтального скролла) нужно ограничивать не только в режиме
+  // карусели (когда соперников > 1) — при РОВНО ОДНОМ сопернике
+  // .opponent-slot тоже иначе растягивается по контенту без предела
+  // (см. .opponent-table в 07-game-table.css), а внешние контейнеры
+  // (.opponent-strip/.opponent-scroll) режут всё, что не поместилось,
+  // а не скроллят — лишние существа просто пропадали из виду.
+  // .single-opponent — отдельный от .carousel-mode класс: даёт ТОЛЬКО
+  // ограничение ширины стола, без переключательской обвязки (стрелки,
+  // вынесенное имя), которая одному сопернику не нужна.
+  carousel.classList.toggle('single-opponent', total === 1);
+
   const isCarouselMode = window.innerWidth <= 900 && total > 1;
 
   if (!isCarouselMode){
